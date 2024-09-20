@@ -10,5 +10,5 @@ build: {
   DllFolder: "",
   HotUpdateFolder: "update",
   UseStartupChart: true,
-  IsUseSysTitle: false,
+  IsUseSysTitle: true,
 };

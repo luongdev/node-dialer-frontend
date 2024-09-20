@@ -24,9 +24,10 @@ class MainInit {
       },
       titleBarStyle: config.IsUseSysTitle ? "default" : "hidden",
       height: 800,
+      minHeight: 640,
       useContentSize: true,
-      width: 1700,
-      minWidth: 1366,
+      width: 640,
+      minWidth: 640,
       show: false,
       frame: config.IsUseSysTitle,
       webPreferences: {
@@ -38,7 +39,7 @@ class MainInit {
       },
     });
 
-    this.mainWindow.loadURL(this.winURL);
+    this.mainWindow.loadURL(this.winURL).catch(console.error);
     this.mainWindow.once("ready-to-show", () => {
       this.mainWindow.show();
       if (config.UseStartupChart) this.loadWindow.destroy();
@@ -91,6 +92,7 @@ class MainInit {
       this.createMainWindow();
     }, 1500);
   }
+
   initWindow() {
     if (config.UseStartupChart) {
       return this.loadingWindow(this.shartURL);
