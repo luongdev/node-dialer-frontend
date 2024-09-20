@@ -1,6 +1,11 @@
 import {defineStore} from 'pinia';
 import {Ref, ref, watch} from 'vue';
 import {UA, WebSocketInterface, URI} from 'jssip';
+import {useCallStore} from "@store/call/call";
+
+import router from '@renderer/router';
+import {EndEvent, IncomingEvent, OutgoingEvent} from "jssip/lib/RTCSession";
+import {useAudioStore} from "@store/call/audio";
 
 interface WebrtcAgent {
     connecting: Ref<boolean>;
@@ -10,10 +15,14 @@ interface WebrtcAgent {
 
 let _ua: UA;
 const _uaHandlers = {
-    connecting: () => {},
-    connected: () => {},
-    registered: () => {},
-    registrationFailed: () => {},
+    connecting: () => {
+    },
+    connected: () => {
+    },
+    registered: () => {
+    },
+    registrationFailed: () => {
+    },
 }
 
 export const useWebRTCAgent = defineStore({
@@ -59,6 +68,48 @@ export const useWebRTCAgent = defineStore({
 
             _ua.on('registered', () => {
                 self.registered = true;
+
+                _ua.on('newRTCSession', (data: any) => {
+                    const call = useCallStore();
+                    const {from, to} = data.request || {};
+                    if (data.originator === 'remote') {
+                        console.log('INCOMING CALL', data.request)
+                        call.init(data.session.id, 'inbound', from?.uri?.user, to?.uri?.user, data.session);
+
+                        router.push('/incoming-call').catch(console.error)
+                    } else {
+                        console.log('OUTGOING CALL', data.request)
+                        call.init(data.session.id, 'outbound', from?.uri?.user, to?.uri?.user, data.session);
+                        router.push('/outgoing-call').catch(console.error)
+                    }
+
+                    if (data.session) {
+                        const audio = useAudioStore();
+                        data.session.on('accepted', (event: IncomingEvent | OutgoingEvent) => {
+                            const remoteStream = new MediaStream()
+                            data.session.connection?.getReceivers()?.forEach(receiver => {
+                                if (receiver.track) {
+                                    remoteStream.addTrack(receiver.track)
+                                }
+                            })
+
+                            audio.play(remoteStream)
+                        })
+
+                        data.session.on('failed', (event: EndEvent) => {
+                            const call = useCallStore();
+                            call.$reset();
+                            console.log('Session failed: ', event)
+                        })
+
+                        data.session.on('ended', (event: EndEvent) => {
+                            const call = useCallStore();
+                            call.$reset();
+                            console.log('Session ended: ', event)
+                        })
+                    }
+                })
+
 
                 if (_uaHandlers.registered) {
                     _uaHandlers.registered();

@@ -15,7 +15,7 @@
       </div>
 
       <div class="flex justify-center w-full px-6 mt-10">
-        <a-button danger type="primary" size="large" @click="">
+        <a-button danger type="primary" size="large" @click="callHangup">
           Hangup
         </a-button>
       </div>
@@ -38,11 +38,25 @@
 <script lang="ts" setup>
 import {onMounted, ref, defineProps} from "vue";
 import { useDuration } from "@renderer/utils/reusable/duration";
+import {useCallStore} from "@store/call/call";
+
+import router from '@renderer/router';
+
 
 const {startTime} = defineProps({
   startTime: {type: Number, default: () => Date.now()},
 })
 
 const { duration } = useDuration(startTime);
+
+
+const call = useCallStore();
+
+const callHangup = () => {
+  call.terminate();
+
+  router.push('/');
+}
+
 
 </script>
