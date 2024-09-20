@@ -17,6 +17,7 @@
     "paths": {
       "@config/*": ["config/*"],
       "@renderer/*": ["src/renderer/*"],
+      "@layouts/*": ["src/renderer/layouts/*"],
       "@main/*": ["src/main/*"],
       "@store/*": ["src/renderer/store/modules/*"]
     },

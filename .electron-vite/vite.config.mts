@@ -22,6 +22,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@renderer": root,
+      "@layouts": join(root, "/layouts"),
       "@store": join(root, "/store/modules"),
     },
   },
