@@ -20,7 +20,7 @@ app.use(router);
 app.use(store);
 app.use(antd);
 
-router.push('/')
+router.push('/test')
 
 errorHandler(app);
 
