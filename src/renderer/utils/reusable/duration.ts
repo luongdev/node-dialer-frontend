@@ -1,4 +1,4 @@
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import {ref, onMounted} from 'vue';
 import Timer from "@renderer/utils/timer";
 
 const useDuration = (startTime = Date.now(), every = 1000) => {
@@ -15,8 +15,8 @@ const useDuration = (startTime = Date.now(), every = 1000) => {
         })
     })
 
-    return { duration: formattedTime }
+    return {duration: formattedTime}
 }
 
 
-export { useDuration };
+export {useDuration};
