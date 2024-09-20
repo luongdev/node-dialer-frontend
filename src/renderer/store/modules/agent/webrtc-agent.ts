@@ -70,6 +70,7 @@ export const useWebRTCAgent = defineStore({
                 self.registered = true;
 
                 _ua.on('newRTCSession', (data: any) => {
+                    debugger
                     const call = useCallStore();
                     const {from, to} = data.request || {};
                     if (data.originator === 'remote') {
@@ -127,6 +128,24 @@ export const useWebRTCAgent = defineStore({
             _ua.start();
 
             return _ua;
+        },
+        call: function(number: string, dialedNumber?: string) {
+            const audio = useAudioStore();
+            audio.start();
+
+            watch(() => audio.local, (stream) => {
+                const session = _ua.call(`sip:${number}@voiceuat.metechvn.com`, {
+                    // mediaStream: stream,
+                    mediaConstraints: { video: false, audio: true },
+                    extraHeaders: [
+                        `X-Custom: ${number}`
+                    ]
+                });
+
+                console.log(session)    
+            });
+
+            
         },
         stop: function () {
             if (_ua && _ua.isConnected()) {

@@ -40,10 +40,14 @@
 </template>
 
 <script setup lang="ts">
+const maxLength = 12;
+
 import Numpad from '@renderer/components/keyboard/Numpad.vue';
 import { ref } from 'vue';
+import { useWebRTCAgent } from '@store/agent/webrtc-agent';
 
-const maxLength = 12;
+const wrtcAgent = useWebRTCAgent();
+
 
 const inputStr = ref('');
 
@@ -60,7 +64,7 @@ const removeLastNum = () => {
 }
 
 const makeCall = () => {
-    console.log('Minh dial so ', inputStr)
+    wrtcAgent.call(inputStr.value)
 }
 </script>
 
