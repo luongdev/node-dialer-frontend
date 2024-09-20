@@ -6,7 +6,6 @@
         <span class="title">
           {{ i18nt.welcome }}
         </span>
-        <system-information></system-information>
       </div>
 
       <!--  -->
@@ -273,104 +272,6 @@ ipcRendererChannel.UpdateProcessStatus.on((event, msg) => {
 // });
 </script>
 
-<style scoped lang="scss">
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+<style scoped lang="css">
 
-body {
-  font-family: "Source Sans Pro", sans-serif;
-}
-
-#wrapper {
-  padding: 124px 80px;
-}
-
-#logo {
-  height: auto;
-  margin-bottom: 20px;
-  width: 420px;
-}
-
-main {
-  display: flex;
-  justify-content: space-between;
-}
-
-main > div {
-  flex-basis: 50%;
-}
-
-.left-side {
-  display: flex;
-  flex-direction: column;
-}
-
-.welcome {
-  color: #555;
-  font-size: 23px;
-  margin-bottom: 10px;
-}
-
-.title {
-  color: #2c3e50;
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 6px;
-}
-
-.title.alt {
-  font-size: 18px;
-  margin-bottom: 10px;
-}
-
-.doc {
-  margin-bottom: 10px;
-}
-
-.doc p {
-  color: black;
-  margin-bottom: 10px;
-}
-
-.doc {
-  button {
-    margin-top: 10px;
-    margin-right: 10px;
-  }
-
-  .btu {
-    display: inline-block;
-    line-height: 1;
-    white-space: nowrap;
-    cursor: pointer;
-    color: #fff;
-    background-color: #409eff;
-    border: 1px solid #409eff;
-    text-align: center;
-    box-sizing: border-box;
-    outline: none;
-    transition: 0.1s;
-    font-weight: 500;
-    padding: 12px 20px;
-    font-size: 14px;
-    border-radius: 4px;
-  }
-
-  .btu:focus,
-  .btu:hover {
-    background: #3a8ee6;
-    border-color: #3a8ee6;
-  }
-}
-
-.doc .button + .button {
-  margin-left: 0;
-}
-
-.conten {
-  text-align: center;
-}
 </style>
