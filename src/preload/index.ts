@@ -1,7 +1,7 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent, shell } from "electron";
 import { platform, release, arch } from "os";
 import { onUnmounted } from "vue";
-import { IpcChannelMainClass, IpcChannelRendererClass } from "../ipc/index";
+import { IpcChannelMainClass, IpcChannelRendererClass } from "../ipc";
 
 function getIpcRenderer() {
   const IpcRenderer = {};

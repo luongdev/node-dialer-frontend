@@ -1,4 +1,4 @@
-// todo 是否将ipc-main.ts文件中的代码拆分到多个文件中？通过abstract继承？或者注册回调函数？
+// todo Split the code in the ipc-main.ts file into multiple files? Inherit via abstract? Or register a callback function?
 import { ipcMain } from "electron";
 import { IpcMainHandleClass } from "./ipc-main-handle";
 

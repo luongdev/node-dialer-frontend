@@ -1,4 +1,3 @@
-// 这里定义了静态文件路径的位置
 import { join } from 'path'
 import config from '@config/index'
 import { app } from 'electron'

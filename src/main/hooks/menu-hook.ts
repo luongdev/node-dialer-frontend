@@ -42,7 +42,7 @@ const menu: Array<(MenuItemConstructorOptions) | (MenuItem)> = [
 ];
 
 export const useMenu = () => {
-    const creactMenu = () => {
+    const createMenu = () => {
         if (process.env.NODE_ENV === "development") {
             menu.push({
                 label: "Developers",
@@ -59,6 +59,6 @@ export const useMenu = () => {
         Menu.setApplicationMenu(menuTemplate);
     }
     return {
-        creactMenu
+        createMenu
     }
 }

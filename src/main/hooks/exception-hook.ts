@@ -52,20 +52,20 @@ export const useProcessException = (): UseProcessExceptionRetrun => {
             };
             switch (details.reason) {
                 case "crashed":
-                    message.title = "警告";
-                    message.buttons = ["确定", "退出"];
-                    message.message = "图形化进程崩溃，是否进行软重启操作？";
+                    message.title = "warn";
+                    message.buttons = ["Sure", "quit"];
+                    message.message = "The graphical process crashes. Do you want to perform a soft restart?";
                     break;
                 case "killed":
-                    message.title = "警告";
-                    message.buttons = ["确定", "退出"];
+                    message.title = "warn";
+                    message.buttons = ["Sure", "quit"];
                     message.message =
-                        "由于未知原因导致图形化进程被终止，是否进行软重启操作？";
+                        "The graphical process was terminated due to unknown reasons. Do you want to perform a soft restart?";
                     break;
                 case "oom":
-                    message.title = "警告";
-                    message.buttons = ["确定", "退出"];
-                    message.message = "内存不足，是否软重启释放内存？";
+                    message.title = "warn";
+                    message.buttons = ["Sure", "quit"];
+                    message.message = "Insufficient memory, soft restart to free up memory?";
                     break;
 
                 default:
@@ -103,15 +103,15 @@ export const useProcessException = (): UseProcessExceptionRetrun => {
                 case "GPU":
                     switch (details.reason) {
                         case "crashed":
-                            message.title = "警告";
-                            message.buttons = ["确定", "退出"];
-                            message.message = "硬件加速进程已崩溃，是否关闭硬件加速并重启？";
+                            message.title = "warn";
+                            message.buttons = ["Sure", "quit"];
+                            message.message = "The hardware acceleration process has crashed. Do you want to turn off hardware acceleration and restart it?";
                             break;
                         case "killed":
-                            message.title = "警告";
-                            message.buttons = ["确定", "退出"];
+                            message.title = "warn";
+                            message.buttons = ["Sure", "quit"];
                             message.message =
-                                "硬件加速进程被意外终止，是否关闭硬件加速并重启？";
+                                "The hardware acceleration process was terminated unexpectedly. Do you want to turn off hardware acceleration and restart it?";
                             break;
                         default:
                             break;
@@ -130,7 +130,7 @@ export const useProcessException = (): UseProcessExceptionRetrun => {
                     noLink: true,
                 })
                 .then((res) => {
-                    // 当显卡出现崩溃现象时使用该设置禁用显卡加速模式。
+                    // Use this setting to disable graphics card acceleration mode when the graphics card crashes.
                     if (res.response === 0) {
                         if (details.type === "GPU") app.disableHardwareAcceleration();
                         window.reload();

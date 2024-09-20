@@ -60,7 +60,6 @@ export class IpcMainHandleClass implements IIpcMainHandle {
         preload: getPreloadFile("preload"),
       },
     });
-    // 开发模式下自动开启devtools
     if (process.env.NODE_ENV === "development") {
       childWin.webContents.openDevTools({ mode: "undocked", activate: true });
     }
@@ -68,7 +67,6 @@ export class IpcMainHandleClass implements IIpcMainHandle {
     childWin.once("ready-to-show", () => {
       childWin.show();
       if (arg.IsPay) {
-        // 检查支付时候自动关闭小窗口
         const testUrl = setInterval(() => {
           const Url = childWin.webContents.getURL();
           if (Url.includes(arg.PayUrl)) {
@@ -80,7 +78,6 @@ export class IpcMainHandleClass implements IIpcMainHandle {
         });
       }
     });
-    // 渲染进程显示时触发
     childWin.once("show", () => {
       webContentSend.SendDataTest(childWin.webContents, arg.sendData);
     });

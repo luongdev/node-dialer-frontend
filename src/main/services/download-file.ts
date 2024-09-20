@@ -5,15 +5,6 @@ import { stat, remove } from "fs-extra";
 import packageInfo from "../../../package.json";
 import { webContentSend } from "./web-content-send";
 
-/**
- *
- * @description
- * @returns {void} 下载类
- * @param {mainWindow} 主窗口
- * @param {downloadUrl} 下载地址，当未传入时则会使用预先设置好的baseUrl拼接名称
- * @author Sky
- * @date 2020-08-12
- */
 
 class Main {
   public mainWindow: BrowserWindow = null;
@@ -39,7 +30,6 @@ class Main {
   }
 
   start() {
-    // 更新时检查有无同名文件，若有就删除，若无就开始下载
     stat(this.HistoryFilePath, async (err, stats) => {
       try {
         if (stats) {
@@ -71,8 +61,8 @@ class Main {
             default:
               webContentSend.DownloadError(this.mainWindow.webContents, true);
               dialog.showErrorBox(
-                "下载出错",
-                "由于网络或其他未知原因导致下载出错"
+                "Download error",
+                "Due to network or other unknown reasons Download error"
               );
               break;
           }
@@ -88,8 +78,8 @@ class Main {
             case "interrupted":
               webContentSend.DownloadError(this.mainWindow.webContents, true);
               dialog.showErrorBox(
-                "下载出错",
-                "由于网络或其他未知原因导致下载出错."
+                "Download error",
+                "Due to network or other unknown reasons Download error."
               );
               break;
             default:

@@ -35,7 +35,6 @@ export default (env = "production", type = "main") => {
         preventAssignment: true,
         "process.env.userConfig": config ? JSON.stringify(config) : "{}",
       }),
-      // 提供路径和读取别名
       nodeResolve({
         preferBuiltins: true,
         browser: false,
