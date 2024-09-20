@@ -39,7 +39,7 @@ export const useCallStore = defineStore({
             this.startTime = Date.now();
             this.session = session;
 
-            useAudioStore().start()
+            useAudioStore().start();
         },
         answer: function () {
             this.callStatus = 'ANSWERED';
@@ -48,11 +48,13 @@ export const useCallStore = defineStore({
                 mediaConstraints: {audio: true, video: false},
                 pcConfig: {iceServers: []},
                 mediaStream: useAudioStore().local,
-            })
+            });
         },
         terminate: function (code = 200, reason = 'OK') {
             this.callStatus = 'TERMINATED';
-            this.session?.terminate({status_code: code, reason_phrase: reason})
+            this.session?.terminate({status_code: code, reason_phrase: reason});
+
+            this.reset();
         },
         reset: function () {
             this.callId = '';

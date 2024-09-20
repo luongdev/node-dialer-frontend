@@ -6,9 +6,8 @@
           <a-avatar size={480} src="https://randomuser.me/api/portraits/men/75.jpg"/>
         </div>
         <div class="text-center mt-6">
-          <p class="text-2xl ">John Doe</p>
-          <p class="text-lg text-gray-500 mt-2">+1 234 567 890</p>
-          <p class="text-lg text-gray-500 mt-2">From: New York, USA</p>
+          <p class="text-2xl ">{{ call.from }}</p>
+          <p class="text-lg text-gray-500 mt-2">{{ call.to }}</p>
         </div>
         <div class="flex justify-around w-full px-6 mt-10">
           <a-button

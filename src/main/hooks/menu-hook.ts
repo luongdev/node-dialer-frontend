@@ -29,7 +29,7 @@ const menu: Array<(MenuItemConstructorOptions) | (MenuItem)> = [
                     dialog.showMessageBox({
                         title: "About",
                         type: "info",
-                        message: "electron-Vue",
+                        message: "Desk Dialer",
                         detail: `Version：${version}\nNode：${process.versions.v8
                             }\nOS：${type()} ${arch()} ${release()}`,
                         noLink: true,

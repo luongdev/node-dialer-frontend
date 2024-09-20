@@ -5,9 +5,8 @@
         <a-avatar size={80} src="https://randomuser.me/api/portraits/men/75.jpg"/>
       </div>
       <div class="text-center mt-6">
-        <p class="text-2xl ">John Doe</p>
-        <p class="text-lg text-gray-500 mt-2">+1 234 567 890</p>
-        <p class="text-lg text-gray-500 mt-2">From: New York, USA</p>
+        <p class="text-2xl ">{{ call.from }}</p>
+        <p class="text-lg text-gray-500 mt-2">{{ call.to }}</p>
       </div>
 
       <div class="text-center mt-4">
@@ -36,8 +35,8 @@
 </template>
 
 <script lang="ts" setup>
-import {onMounted, ref, defineProps} from "vue";
-import { useDuration } from "@renderer/utils/reusable/duration";
+import {defineProps, watch} from "vue";
+import {useDuration} from "@renderer/utils/reusable/duration";
 import {useCallStore} from "@store/call/call";
 
 import router from '@renderer/router';
@@ -47,15 +46,19 @@ const {startTime} = defineProps({
   startTime: {type: Number, default: () => Date.now()},
 })
 
-const { duration } = useDuration(startTime);
+const {duration} = useDuration(startTime);
 
 
 const call = useCallStore();
+watch(() => call.callStatus, (status: string) => {
+  console.log('Call status changed to: ', status);
+  if ('TERMINATED' === status) {
+    router.push('/');
+  }
+})
 
 const callHangup = () => {
   call.terminate();
-
-  router.push('/');
 }
 
 
