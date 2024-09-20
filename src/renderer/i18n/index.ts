@@ -2,7 +2,7 @@ import { computed, ref } from "vue";
 
 export const globalLang = ref('en')
 export function loadLanguages() {
-  const context: any = import.meta['glob']("./languages/*.ts", { eager: true });
+  const context: any = import.meta.glob("./languages/*.ts", { eager: true });
 
   const languages: any = {};
 
