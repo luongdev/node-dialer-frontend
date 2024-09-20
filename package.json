@@ -1,10 +1,7 @@
 {
-  "name": "electron-vite-template",
+  "name": "DeskDialer",
   "version": "1.0.0",
   "main": "./dist/electron/main/main.js",
-  "author": "sky <https://github.com/umbrella22>",
-  "description": "electron-vite-template project",
-  "license": "MIT",
   "scripts": {
     "dev": "tsx .electron-vite/dev-runner.ts",
     "build": "cross-env BUILD_TARGET=clean tsx .electron-vite/build.ts -m prod && electron-builder -c build.json",
@@ -66,11 +63,5 @@
     "vite": "^5.4.6",
     "vue": "^3.5.6",
     "vue-router": "^4.4.5"
-  },
-  "keywords": [
-    "vite",
-    "electron",
-    "vue3",
-    "rollup"
-  ]
+  }
 }
