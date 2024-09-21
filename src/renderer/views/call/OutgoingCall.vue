@@ -32,26 +32,28 @@ import {computed, ref, watch} from 'vue';
 
 import { useDuration } from '@renderer/utils/reusable/duration';
 import router from '@renderer/router';
+import { useWebRTCAgent } from '@renderer/store/modules/agent/webrtc-agent';
 
 const endTimer = ref(false);
 const { duration, start } = useDuration();
 
 const call = useCallStore();
+const wrtcAgent = useWebRTCAgent();
 
 const terminateCall = () => {
   let code = 200;
   let phrase = 'NORMAL_CLEARING';
-  if ('ANSWERED' !== call.callStatus) {
+  if ('ANSWERED' !== call.status) {
     code = 487;
     phrase = 'ORIGINATOR_CANCEL';
   }
 
-  call.terminate(code, phrase);
+  wrtcAgent.terminate(code, phrase);
 
   router.push('/')
 }
 
-watch(() => call.callStatus, (callStatus: string) => {
+watch(() => call.status, (callStatus: string) => {
   if ('TERMINATED' === callStatus) {
     endTimer.value = true;
     start(Date.now());
@@ -59,8 +61,8 @@ watch(() => call.callStatus, (callStatus: string) => {
 })
 
 const callStatusLabel = computed(() => {
-  console.log('Day la call status label:', call.callStatus)
-  switch (call.callStatus) {
+  console.log('Day la call status label:', call.status)
+  switch (call.status) {
     case 'NEW':
       return 'Đang khởi tạo';
     case 'RINGING':

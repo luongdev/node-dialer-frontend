@@ -14,14 +14,17 @@ export const useAudioStore = defineStore({
         }
     },
     actions: {
-        start: async function (): Promise<MediaStream> {
+        start: async function (): Promise<AudioState> {
             const stream = await navigator.mediaDevices.getUserMedia({audio: true});
             this.local = stream;
+            this.remote = new MediaStream();
                 
-            return this.local;
+            return { local: this.local, remote: this.remote };
         },
-        play(remoteStream: MediaStream) {
-            this.remote = remoteStream;
+        play(remoteStream?: MediaStream) {
+            if (remoteStream) {
+                this.remote = remoteStream;
+            }
 
             const audioElm = new window.Audio()
             audioElm.srcObject = remoteStream

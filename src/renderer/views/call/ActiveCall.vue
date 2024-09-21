@@ -51,7 +51,7 @@ onMounted(() => start())
 
 
 const call = useCallStore();
-watch(() => call.callStatus, (status: string) => {
+watch(() => call.status, (status: string) => {
   console.log('Call status changed to: ', status);
   if ('TERMINATED' === status) {
     router.push('/');

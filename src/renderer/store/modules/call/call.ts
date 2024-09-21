@@ -1,64 +1,44 @@
 import {defineStore} from "pinia";
 import {RemovableRef, useStorage} from "@vueuse/core";
-import {RTCSession} from "jssip/lib/RTCSession";
-import {ref, watch} from "vue";
-import {useAudioStore} from "@store/call/audio";
+import {ref} from "vue";
+
+export enum CallStatus {
+    S_NEW = 'NEW',
+    S_RINGING = 'RINGING',
+    S_ANSWERED = 'ANSWERED',
+    S_TERMINATED = 'TERMINATED'
+}
 
 export interface CallState {
-    callId: RemovableRef<string>;
-    callStatus: RemovableRef<string>;
-    direction?: string;
+    id: RemovableRef<string>;
+    status: RemovableRef<string>;
+    inbound?: boolean;
     from?: string;
     to?: string;
     startTime?: number;
     answerTime?: number;
-    session?: RTCSession;
 }
 
 export const useCallStore = defineStore({
     id: 'call',
     state: (): CallState => {
-        const callId = useStorage('callId', ref(''));
-        const callStatus = useStorage('callStatus', ref('NEW'));
+        const id = useStorage('call_id', ref(''));
+        const status = useStorage('call_status', ref(''));
 
-        return {
-            callId,
-            callStatus,
-        }
+        return { id, status }
     },
     actions: {
-        init: async function (id: string, direction: string, from: string, to: string, session: RTCSession) {
-            if (this.callId.length) {
+        init: async function (id: string, from: string, to: string, inbound: boolean) {
+            if (this.id.length) {
                 return;
             }
 
-            this.callId = id;
-            this.direction = direction;
+            this.id = id;
+            this.status = CallStatus.S_NEW;
+            this.inbound = inbound;
             this.from = from;
             this.to = to;
             this.startTime = Date.now();
-            this.session = session;
-
-            await useAudioStore().start();
-        },
-        answer: function () {
-            this.callStatus = 'ANSWERED';
-            this.answerTime = Date.now();
-            this.session?.answer({
-                mediaConstraints: {audio: true, video: false},
-                pcConfig: {iceServers: []},
-                mediaStream: useAudioStore().local,
-            });
-        },
-        terminate: function (code = 200, reason = 'OK') {
-            this.callStatus = 'TERMINATED';
-            this.session?.terminate({status_code: code, reason_phrase: reason});
-
-            this.reset();
-        },
-        reset: function () {
-            this.callId = '';
-            this.callStatus = '';
         }
     },
 })

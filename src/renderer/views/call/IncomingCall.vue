@@ -40,12 +40,15 @@ import {useCallStore} from "@store/call/call";
 import {ref, watch} from "vue";
 
 import router from '@renderer/router';
+import { useWebRTCAgent } from "@renderer/store/modules/agent/webrtc-agent";
 
 const reactEnabled = ref(false);
 
 const call = useCallStore();
+const wrtcAgent = useWebRTCAgent();
 
-watch(() => call.callStatus, (status: string) => {
+
+watch(() => call.status, (status: string) => {
   console.log('Call status changed to: ', status);
   if ('NEW' === status) {
     reactEnabled.value = true;
@@ -59,11 +62,11 @@ watch(() => call.callStatus, (status: string) => {
 })
 
 const answerCall = () => {
-  call.answer();
+  wrtcAgent.answer();
 }
 
 const declineCall = () => {
-  call.terminate(486, 'Agent Rejected');
+  wrtcAgent.terminate(486, 'Agent Rejected');
 }
 
 </script>
