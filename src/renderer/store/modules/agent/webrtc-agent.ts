@@ -3,7 +3,15 @@ import { Ref, ref, watch } from 'vue';
 import { UA, WebSocketInterface, URI } from 'jssip';
 
 import router from '@renderer/router';
-import { EndEvent, IncomingEvent, OutgoingEvent, RTCSession } from "jssip/lib/RTCSession";
+import {
+    EndEvent,
+    IncomingAckEvent,
+    OutgoingAckEvent,
+    IncomingEvent,
+    OutgoingEvent,
+    RTCSession,
+    ConnectingEvent as RTCConnectingEvent
+} from "jssip/lib/RTCSession";
 import {
     ConnectingEvent,
     ConnectedEvent,
@@ -77,12 +85,7 @@ export const useWebRTCAgent = defineStore({
                 extraHeaders,
                 mediaStream: local,
                 sessionTimersExpires: 120,
-                rtcOfferConstraints: { offerToReceiveAudio: true, offerToReceiveVideo: false },
-                eventHandlers: {
-                    icecandidate: ({ candidate }) => {
-                        console.log('Dang candicate day nay', candidate)
-                    }
-                }
+                rtcOfferConstraints: { offerToReceiveAudio: true, offerToReceiveVideo: false }
             });
 
 
@@ -181,61 +184,25 @@ const onRTPSession = async (event: RTCSessionEvent) => {
     router.push('remote' === event.originator ? '/incoming-call' : '/outgoing-call').catch(console.error)
 
     session.on('accepted', onSessionAccepted);
+    session.on('confirmed', onSessionConfirmed);
     session.on('failed', onSessionEnded);
     session.on('ended', onSessionEnded);
 
 
-    session.on('peerconnection', (event: any) => {
-        console.log('Day event event peerconnection', event);
-    });
-    session.on('connecting', (event: any) => {
-        console.log('Day event event connecting', event);
-    });
-    session.on('sending', (event: any) => {
-        console.log('Day event event sending', event);
-    });
-    session.on('progress', (event: any) => {
-        console.log('Day event event progress', event);
-    });
-    session.on('confirmed', (event: any) => {
-        console.log('Day event event confirmed', event);
-    });
-    session.on('newDTMF', (event: any) => {
-        console.log('Day event event newDTMF', event);
-    });
-    session.on('newInfo', (event: any) => {
-        console.log('Day event event newInfo', event);
-    });
-    session.on('hold', (event: any) => {
-        console.log('Day event event hold', event);
-    });
-    session.on('unhold', (event: any) => {
-        console.log('Day event event unhold', event);
-    });
-    session.on('muted', (event: any) => {
-        console.log('Day event event muted', event);
-    });
-    session.on('unmuted', (event: any) => {
-        console.log('Day event event unmuted', event);
-    });
-    session.on('reinvite', (event: any) => {
-        console.log('Day event event reinvite', event);
-    });
-    session.on('update', (event: any) => {
-        console.log('Day event event update', event);
-    });
-    session.on('refer', (event: any) => {
-        console.log('Day event event refer', event);
-    });
-    session.on('replaces', (event: any) => {
-        console.log('Day event event replaces', event);
-    });
-    session.on('sdp', (event: any) => {
-        console.log('Day event event sdp', event);
-    });
-    session.on('icecandidate', (event: any) => {
-        console.log('Day event event icecandidate', event);
-    });
+    // Outbound call trigger connection
+    session.on('connecting', onSessionConnecting);
+
+    // Inbound call trigger progress & peerconnection
+    session.on('progress', onSessionProgress);
+    session.on('peerconnection', (event: any) => console.debug('UA[onSessionPeerConnection]: ', event));
+
+    session.on('icecandidate', (event: any) => console.debug('UA[onSessionCandidate]: ', event));
+}
+
+const onSessionConnecting = (event: RTCConnectingEvent) => {
+    console.log('UA[onSessionConnecting] ', event.request)
+    const call = useCallStore();
+    call.status = CallStatus.S_CONNECTING;
 }
 
 const onSessionAccepted = async (event: (IncomingEvent | OutgoingEvent)) => {
@@ -244,6 +211,7 @@ const onSessionAccepted = async (event: (IncomingEvent | OutgoingEvent)) => {
     const wrtcAgent = useWebRTCAgent();
 
     call.status = CallStatus.S_ANSWERED;
+    call.answerTime = Date.now();
     const { remote } = await audio.start();
     wrtcAgent.session?.connection?.getReceivers()?.forEach(receiver => {
         if (receiver.track) remote.addTrack(receiver.track);
@@ -253,10 +221,27 @@ const onSessionAccepted = async (event: (IncomingEvent | OutgoingEvent)) => {
 
 }
 
+const onSessionProgress = (event: IncomingEvent | OutgoingEvent) => {
+    console.debug('UA[onSessionProgress]: ', event);
+    const call = useCallStore();
+    call.status = CallStatus.S_RINGING;
+}
+
+const onSessionConfirmed = (event: IncomingAckEvent | OutgoingAckEvent) => {
+    console.debug('UA[onSessionConfirmed]: ', event);
+    const call = useCallStore();
+    
+    if (CallStatus.S_ANSWERED !== call.status) {
+        call.status = CallStatus.S_ANSWERED;
+        call.answerTime = Date.now();
+    }
+}
+
 const onSessionEnded = (event: EndEvent) => {
     console.debug('UA[onSessionEnded]: ', event);
     const call = useCallStore();
-    call.$reset();
+    call.id = '';
+    call.status = '';
 }
 
 const bindConnectionEvents = (ua: UA) => {

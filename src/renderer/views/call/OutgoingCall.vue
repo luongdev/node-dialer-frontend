@@ -16,7 +16,6 @@
         <p class="text-xl text-gray-700 font-bold">{{ callStatusLabel }}</p>
       </div>
 
-      <!-- Nút Cancel -->
       <div class="flex justify-center w-full px-6 mt-10">
         <a-button danger size="large" type="primary" class="" @click="terminateCall">
           Cancel
@@ -27,11 +26,10 @@
 </template>
 
 <script lang="ts" setup>
-import { useCallStore } from '@renderer/store/modules/call/call';
+import { CallStatus, useCallStore } from '@renderer/store/modules/call/call';
 import { computed, ref } from 'vue';
 
 import { useDuration } from '@renderer/utils/reusable/duration';
-import router from '@renderer/router';
 import { useWebRTCAgent } from '@renderer/store/modules/agent/webrtc-agent';
 
 const endTimer = ref(false);
@@ -43,7 +41,7 @@ const wrtcAgent = useWebRTCAgent();
 const terminateCall = () => {
   let code = 200;
   let phrase = 'NORMAL_CLEARING';
-  if ('ANSWERED' !== call.status) {
+  if (CallStatus.S_ANSWERED !== call.status) {
     code = 487;
     phrase = 'ORIGINATOR_CANCEL';
   }
@@ -52,15 +50,15 @@ const terminateCall = () => {
 }
 
 const callStatusLabel = computed(() => {
-  console.log('Day la call status label:', call.status)
   switch (call.status) {
-    case 'NEW':
+    case CallStatus.S_NEW:
+    case CallStatus.S_CONNECTING:
       return 'Đang khởi tạo';
-    case 'RINGING':
+    case CallStatus.S_RINGING:
       return 'Đang đổ chuông';
-    case 'ANSWERED':
+    case CallStatus.S_ANSWERED:
       return 'Đã kết nối';
-    case 'TERMINATED':
+    case CallStatus.S_TERMINATED:
       return 'Đã kết thúc';
     default:
       return 'Đang kết nối';

@@ -1,10 +1,8 @@
 import { defineStore } from "pinia";
-import { watch } from "vue";
-
-import router from "@renderer/router";
 
 export enum CallStatus {
     S_NEW = 'NEW',
+    S_CONNECTING = 'CONNECTING',
     S_RINGING = 'RINGING',
     S_ANSWERED = 'ANSWERED',
     S_TERMINATED = 'TERMINATED'
@@ -40,21 +38,3 @@ export const useCallStore = defineStore({
         }
     },
 });
-
-export const statusWatcherStart = () => {
-    const call = useCallStore();
-    watch(() => call.status, (status: CallStatus) => {
-        switch (status) {
-            case CallStatus.S_NEW:
-            case CallStatus.S_RINGING:
-                router.push(call.inbound ? '/incoming-call' : '/outgoing-call').catch(console.error);
-                break;
-            case CallStatus.S_ANSWERED:
-                router.push('/active-call').catch(console.error);
-                break;
-            case CallStatus.S_TERMINATED:
-                router.push('/').catch(console.error);
-                break;
-        }
-    });
-}
