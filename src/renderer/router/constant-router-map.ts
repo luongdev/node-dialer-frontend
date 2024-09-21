@@ -7,7 +7,7 @@ const routes: Array<RouteRecordRaw> = [
     {path: '/incoming-call', name: 'Incoming Call', component: () => import('@renderer/views/call/IncomingCall.vue')},
     {path: '/outgoing-call', name: 'Outgoing Call', component: () => import('@renderer/views/call/OutgoingCall.vue')},
 
-    {path: '/test', name: 'Outgoing Call', component: () => import('@renderer/views/dialer/Dialer.vue')},
+    {path: '/test', name: 'Test Route', component: () => import('@renderer/views/dialer/Dialer.vue')},
 ]
 
 export default routes

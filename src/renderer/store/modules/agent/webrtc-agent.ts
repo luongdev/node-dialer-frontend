@@ -1,11 +1,11 @@
-import {defineStore} from 'pinia';
-import {Ref, ref, watch} from 'vue';
-import {UA, WebSocketInterface, URI} from 'jssip';
-import {useCallStore} from "@store/call/call";
+import { defineStore } from 'pinia';
+import { Ref, ref, watch } from 'vue';
+import { UA, WebSocketInterface, URI } from 'jssip';
+import { useCallStore } from "@store/call/call";
 
 import router from '@renderer/router';
-import {EndEvent, IncomingEvent, OutgoingEvent} from "jssip/lib/RTCSession";
-import {useAudioStore} from "@store/call/audio";
+import { EndEvent, IncomingEvent, OutgoingEvent } from "jssip/lib/RTCSession";
+import { useAudioStore } from "@store/call/audio";
 
 interface WebrtcAgent {
     connecting: Ref<boolean>;
@@ -25,6 +25,8 @@ const _uaHandlers = {
     },
 }
 
+const defaultDomain = 'voiceuat.metechvn.com';
+
 export const useWebRTCAgent = defineStore({
     id: 'webrtc-agent',
     state: (): WebrtcAgent => {
@@ -32,7 +34,7 @@ export const useWebRTCAgent = defineStore({
         const connecting = ref(false);
         const registered = ref(false);
 
-        return {connected, registered, connecting}
+        return { connected, registered, connecting }
     },
     actions: {
         start: function () {
@@ -40,7 +42,7 @@ export const useWebRTCAgent = defineStore({
 
             const self = this;
             const socket = new WebSocketInterface('ws://101.99.20.58:7080');
-            const contact = new URI('sip', '10000', 'voiceuat.metechvn.com', null, {transport: 'ws'});
+            const contact = new URI('sip', '10000', defaultDomain, null, { transport: 'ws' });
 
             _ua = new UA({
                 sockets: [socket],
@@ -48,6 +50,7 @@ export const useWebRTCAgent = defineStore({
                 contact_uri: contact.toString(),
                 password: 'Abcd@54321',
                 register: true,
+                user_agent: 'NowfAgent'
             })
 
             _ua.on('connecting', () => {
@@ -70,9 +73,8 @@ export const useWebRTCAgent = defineStore({
                 self.registered = true;
 
                 _ua.on('newRTCSession', (data: any) => {
-                    debugger
                     const call = useCallStore();
-                    const {from, to} = data.request || {};
+                    const { from, to } = data.request || {};
                     if (data.originator === 'remote') {
                         console.log('INCOMING CALL', data.request)
                         call.init(data.session.id, 'inbound', from?.uri?.user, to?.uri?.user, data.session);
@@ -129,23 +131,32 @@ export const useWebRTCAgent = defineStore({
 
             return _ua;
         },
-        call: function(number: string, dialedNumber?: string) {
-            const audio = useAudioStore();
-            audio.start();
+        call: async function (number: string, headers: { [k: string]: string } = {}) {
+            if (!number) return;
 
-            watch(() => audio.local, (stream) => {
-                const session = _ua.call(`sip:${number}@voiceuat.metechvn.com`, {
-                    // mediaStream: stream,
-                    mediaConstraints: { video: false, audio: true },
-                    extraHeaders: [
-                        `X-Custom: ${number}`
-                    ]
-                });
+            const stream = await useAudioStore().start();
+            let target = number;
+            if (!number.startsWith('sip:')) {
+                target = `sip:${number}@${defaultDomain}`
+            }
 
-                console.log(session)    
+            const extraHeaders = Object.keys(headers).map(k => {
+                return `X-${k}: ${headers[k]}`;
+            })
+
+            _ua.call(target, {
+                extraHeaders,
+                mediaStream: stream,
+                sessionTimersExpires: 120,
+                rtcOfferConstraints: { offerToReceiveAudio: true, offerToReceiveVideo: false},
+                eventHandlers: {
+                    icecandidate: ({ candidate }) => {
+                        console.log('Dang candicate day nay', candidate)
+                    }
+                }
             });
 
-            
+
         },
         stop: function () {
             if (_ua && _ua.isConnected()) {

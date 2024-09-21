@@ -35,7 +35,7 @@
 </template>
 
 <script lang="ts" setup>
-import {defineProps, watch} from "vue";
+import {defineProps, onMounted, watch} from "vue";
 import {useDuration} from "@renderer/utils/reusable/duration";
 import {useCallStore} from "@store/call/call";
 
@@ -46,7 +46,8 @@ const {startTime} = defineProps({
   startTime: {type: Number, default: () => Date.now()},
 })
 
-const {duration} = useDuration(startTime);
+const {duration, start} = useDuration(startTime);
+onMounted(() => start())
 
 
 const call = useCallStore();

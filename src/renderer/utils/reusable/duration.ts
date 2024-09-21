@@ -1,10 +1,11 @@
-import {ref, onMounted} from 'vue';
+import { ref, onMounted } from 'vue';
 import Timer from "@renderer/utils/timer";
 
-const useDuration = (startTime = Date.now(), every = 1000) => {
+const useDuration = (initStartTime = Date.now(), every = 1000) => {
     const formattedTime = ref<string>('00:00');
 
-    onMounted(() => {
+    const start = (startTime?: number) => {
+        startTime = startTime ?? initStartTime;
         Timer.interval(every, () => {
             const now = Date.now()
             const duration = Math.floor((now - startTime) / 1000)
@@ -13,10 +14,10 @@ const useDuration = (startTime = Date.now(), every = 1000) => {
 
             formattedTime.value = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
         })
-    })
+    }
 
-    return {duration: formattedTime}
+    return { duration: formattedTime, start }
 }
 
 
-export {useDuration};
+export { useDuration };

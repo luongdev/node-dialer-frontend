@@ -47,20 +47,14 @@ import { ref } from 'vue';
 import { useWebRTCAgent } from '@store/agent/webrtc-agent';
 
 const wrtcAgent = useWebRTCAgent();
-
-
 const inputStr = ref('');
 
 const onInput = (key: string) => {
-    if (inputStr.value.length >= 12) return;
-
-    inputStr.value += key;
+    if (inputStr.value.length < 12) inputStr.value += key;
 }
 
 const removeLastNum = () => {
-    if (inputStr.value.length > 0) {
-        inputStr.value = inputStr.value.slice(0, -1)
-    }
+    if (inputStr.value.length > 0) inputStr.value = inputStr.value.slice(0, -1)
 }
 
 const makeCall = () => {

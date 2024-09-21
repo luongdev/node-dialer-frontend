@@ -14,11 +14,11 @@ export const useAudioStore = defineStore({
         }
     },
     actions: {
-        start: function () {
-            const self = this;
-            navigator.mediaDevices.getUserMedia({audio: true})
-                .then(stream => self.local = stream)
-                .catch(console.error)
+        start: async function (): Promise<MediaStream> {
+            const stream = await navigator.mediaDevices.getUserMedia({audio: true});
+            this.local = stream;
+                
+            return this.local;
         },
         play(remoteStream: MediaStream) {
             this.remote = remoteStream;

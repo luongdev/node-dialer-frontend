@@ -27,7 +27,7 @@ export const useCallStore = defineStore({
         }
     },
     actions: {
-        init: function (id: string, direction: string, from: string, to: string, session: RTCSession) {
+        init: async function (id: string, direction: string, from: string, to: string, session: RTCSession) {
             if (this.callId.length) {
                 return;
             }
@@ -39,7 +39,7 @@ export const useCallStore = defineStore({
             this.startTime = Date.now();
             this.session = session;
 
-            useAudioStore().start();
+            await useAudioStore().start();
         },
         answer: function () {
             this.callStatus = 'ANSWERED';
