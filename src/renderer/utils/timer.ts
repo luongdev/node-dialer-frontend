@@ -23,6 +23,12 @@ class Timer {
     return { then: (c) => (callback = c) };
   }
 
+  private _runInterval(callback: Function) {
+    if (typeof callback === "function") {
+      return callback()
+    }
+    return false;
+  }
 
   start() {
     const startDate = new Date();
