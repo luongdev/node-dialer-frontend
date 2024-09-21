@@ -26,10 +26,7 @@ export class IpcChannelMainClass {
   AppClose: IpcMainEventListener = null;
   CheckUpdate: IpcMainEventListener = null;
   ConfirmUpdate: IpcMainEventListener = null;
-  OpenMessagebox: IpcMainEventListener<
-    Electron.MessageBoxOptions,
-    Electron.MessageBoxReturnValue
-  > = null;
+  OpenMessagebox: IpcMainEventListener<Electron.MessageBoxOptions, Electron.MessageBoxReturnValue> = null;
   StartDownload: IpcMainEventListener<string> = null;
   OpenErrorbox: IpcMainEventListener<{ title: string; message: string }> = null;
   StartServer: IpcMainEventListener<void, string> = null;

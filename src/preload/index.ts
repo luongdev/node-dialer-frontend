@@ -1,15 +1,17 @@
-import { contextBridge, ipcRenderer, IpcRendererEvent, shell } from "electron";
+import { contextBridge, ipcRenderer, shell } from "electron";
 import { platform, release, arch } from "os";
 import { onUnmounted } from "vue";
 import { IpcChannelMainClass, IpcChannelRendererClass } from "../ipc";
 
 function getIpcRenderer() {
   const IpcRenderer = {};
+
   Object.keys(new IpcChannelMainClass()).forEach((channel) => {
     IpcRenderer[channel] = {
       invoke: async (args: any) => ipcRenderer.invoke(channel, args),
     };
   });
+
   Object.keys(new IpcChannelRendererClass()).forEach((channel) => {
     IpcRenderer[channel] = {
       on: (listener: (...args: any[]) => void) => {
@@ -27,6 +29,7 @@ function getIpcRenderer() {
       removeAllListeners: () => ipcRenderer.removeAllListeners(channel),
     };
   });
+  
   return IpcRenderer;
 }
 

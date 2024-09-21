@@ -1,4 +1,4 @@
-import { ipcRenderer, shell } from "electron";
+import { shell } from "electron";
 import type { IIpcRendererInvoke, IIpcRendererOn } from "../src/ipc";
 type IpcRendererInvoke = {
   [key in keyof IIpcRendererInvoke]: {

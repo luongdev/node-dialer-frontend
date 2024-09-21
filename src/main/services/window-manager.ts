@@ -25,9 +25,11 @@ class MainInit {
       titleBarStyle: config.IsUseSysTitle ? "default" : "hidden",
       height: 800,
       minHeight: 640,
+      maxHeight: 800,
       useContentSize: true,
       width: 640,
       minWidth: 640,
+      maxWidth: 800,
       show: false,
       frame: config.IsUseSysTitle,
       webPreferences: {

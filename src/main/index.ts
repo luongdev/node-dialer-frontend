@@ -8,10 +8,13 @@ import { useProcessException } from "@main/hooks/exception-hook";
 import { useMenu } from "@main/hooks/menu-hook"
 
 function onAppReady() {
+
   const { disableF12 } = useDisableButton();
   const { renderProcessGone } = useProcessException();
-  const { defaultIpc } = useMainDefaultIpc()
-  const { createMenu } = useMenu()
+  const { defaultIpc } = useMainDefaultIpc();
+  const { createMenu } = useMenu();
+
+
   disableF12();
   renderProcessGone();
   defaultIpc();
@@ -37,8 +40,8 @@ app.on("browser-window-created", () => {
 
 if (process.defaultApp) {
   if (process.argv.length >= 2) {
-    app.removeAsDefaultProtocolClient("electron-vue-template");
+    app.removeAsDefaultProtocolClient("Desk Dialer");
   }
 } else {
-  app.setAsDefaultProtocolClient("electron-vue-template");
+  app.setAsDefaultProtocolClient("Desk Dialer");
 }

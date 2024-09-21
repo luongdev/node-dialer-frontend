@@ -4,7 +4,7 @@ import { updater } from "../services/hot-updater";
 import DownloadFile from "../services/download-file";
 import Update from "../services/check-update";
 import config from "@config/index";
-import { IIpcMainHandle } from "../../ipc/index";
+import { IIpcMainHandle } from "../../ipc";
 import { webContentSend } from "./web-content-send";
 
 export class IpcMainHandleClass implements IIpcMainHandle {
@@ -53,9 +53,7 @@ export class IpcMainHandleClass implements IIpcMainHandle {
       webPreferences: {
         sandbox: false,
         webSecurity: false,
-        // 如果是开发模式可以使用devTools
         devTools: process.env.NODE_ENV === "development",
-        // 在macos中启用橡皮动画
         scrollBounce: process.platform === "darwin",
         preload: getPreloadFile("preload"),
       },

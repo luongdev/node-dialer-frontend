@@ -1,7 +1,8 @@
 {
-  "name": "DeskDialer",
+  "name": "desk-dialer",
   "version": "1.0.0",
   "main": "./dist/electron/main/main.js",
+  "description": "Dialer for WebRTC",
   "scripts": {
     "dev": "tsx .electron-vite/dev-runner.ts",
     "build": "cross-env BUILD_TARGET=clean tsx .electron-vite/build.ts -m prod && electron-builder -c build.json",

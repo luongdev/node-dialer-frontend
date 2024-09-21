@@ -145,7 +145,7 @@ function StartServer() {
     }
   });
 }
-// 获取electron方法
+
 function open() {}
 function CheckUpdate(data) {
   switch (data) {
