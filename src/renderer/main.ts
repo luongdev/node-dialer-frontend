@@ -12,9 +12,12 @@ import antd from 'ant-design-vue';
 
 import { errorHandler } from "./error";
 import "./utils/hackIpcRenderer";
+import { callStoreMiddleware } from "./store/middlewares/call";
 
 const app = createApp(App);
 const store = createPinia();
+
+store.use(callStoreMiddleware);
 
 app.use(router);
 app.use(store);

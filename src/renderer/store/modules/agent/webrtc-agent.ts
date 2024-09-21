@@ -14,7 +14,7 @@ import {
 } from 'jssip/lib/UA';
 
 import { useAudioStore } from '@store/agent/audio';
-import { useCallStore } from "@store/call/call";
+import { CallStatus, useCallStore } from "@store/call/call";
 
 interface WebrtcAgent {
     connecting: Ref<boolean>;
@@ -239,10 +239,11 @@ const onRTPSession = async (event: RTCSessionEvent) => {
 }
 
 const onSessionAccepted = async (event: (IncomingEvent | OutgoingEvent)) => {
+    const call = useCallStore();
     const audio = useAudioStore();
     const wrtcAgent = useWebRTCAgent();
 
-
+    call.status = CallStatus.S_ANSWERED;
     const { remote } = await audio.start();
     wrtcAgent.session?.connection?.getReceivers()?.forEach(receiver => {
         if (receiver.track) remote.addTrack(receiver.track);

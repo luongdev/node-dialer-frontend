@@ -1,4 +1,4 @@
-import {defineStore} from "pinia";
+import { defineStore } from "pinia";
 
 export interface AudioState {
     remote?: MediaStream;
@@ -15,10 +15,10 @@ export const useAudioStore = defineStore({
     },
     actions: {
         start: async function (): Promise<AudioState> {
-            const stream = await navigator.mediaDevices.getUserMedia({audio: true});
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             this.local = stream;
             this.remote = new MediaStream();
-                
+
             return { local: this.local, remote: this.remote };
         },
         play(remoteStream?: MediaStream) {
@@ -26,13 +26,13 @@ export const useAudioStore = defineStore({
                 this.remote = remoteStream;
             }
 
-            const audioElm = new window.Audio()
-            audioElm.srcObject = remoteStream
-            audioElm.play().catch(console.error)
+            const audioElm = new window.Audio();
+            audioElm.srcObject = this.remote;
+            audioElm.play().catch(console.error);
         },
         stop: function () {
-            this.local?.getTracks().forEach((track: any) => track.stop())
-            this.remote?.getTracks().forEach((track: any) => track.stop())
+            this.local?.getTracks().forEach((track: any) => track.stop());
+            this.remote?.getTracks().forEach((track: any) => track.stop());
         }
     }
 })

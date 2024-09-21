@@ -1,6 +1,7 @@
-import {defineStore} from "pinia";
-import {RemovableRef, useStorage} from "@vueuse/core";
-import {ref} from "vue";
+import { defineStore } from "pinia";
+import { watch } from "vue";
+
+import router from "@renderer/router";
 
 export enum CallStatus {
     S_NEW = 'NEW',
@@ -10,8 +11,8 @@ export enum CallStatus {
 }
 
 export interface CallState {
-    id: RemovableRef<string>;
-    status: RemovableRef<string>;
+    id: string;
+    status: string;
     inbound?: boolean;
     from?: string;
     to?: string;
@@ -22,10 +23,7 @@ export interface CallState {
 export const useCallStore = defineStore({
     id: 'call',
     state: (): CallState => {
-        const id = useStorage('call_id', ref(''));
-        const status = useStorage('call_status', ref(''));
-
-        return { id, status }
+        return { id: '', status: '' }
     },
     actions: {
         init: async function (id: string, from: string, to: string, inbound: boolean) {
@@ -41,4 +39,22 @@ export const useCallStore = defineStore({
             this.startTime = Date.now();
         }
     },
-})
+});
+
+export const statusWatcherStart = () => {
+    const call = useCallStore();
+    watch(() => call.status, (status: CallStatus) => {
+        switch (status) {
+            case CallStatus.S_NEW:
+            case CallStatus.S_RINGING:
+                router.push(call.inbound ? '/incoming-call' : '/outgoing-call').catch(console.error);
+                break;
+            case CallStatus.S_ANSWERED:
+                router.push('/active-call').catch(console.error);
+                break;
+            case CallStatus.S_TERMINATED:
+                router.push('/').catch(console.error);
+                break;
+        }
+    });
+}
