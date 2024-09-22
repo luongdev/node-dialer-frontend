@@ -28,17 +28,17 @@
         </a-input>
       </a-form-item>
 
-      <a-form-item label="ICE:">
+      <a-form-item label="ICE:" v-if="true">
         <a-switch v-model:checked="formState.iceEnabled" />
       </a-form-item>
 
       <a-space block v-if="formState.iceEnabled" v-for="(server, index) in formState.iceServers" :key="`ICE-${index}`"
         class="w-full ant-custom">
-        <a-form-item label=" " :name="['iceServers', index, 'uri']"
+        <a-form-item label=" " :name="['iceServers', index, 'address']"
           :rules="{ required: true, message: 'Please input ICE address' }">
-          <a-input v-model:value="server.uri" placeholder="Address">
+          <a-input v-model:value="(server as ICEServer).address" placeholder="Address">
             <template #addonBefore>
-              <a-select v-model:value="server.protocol">
+              <a-select v-model:value="(server as ICEServer).protocol">
                 <a-select-option value="stun">STUN</a-select-option>
                 <a-select-option value="turn">TURN</a-select-option>
               </a-select>
@@ -63,8 +63,8 @@
         </a-button>
       </a-form-item>
 
-      <a-form-item :wrapper-col="{ offset: 8, span: 16 }">
-        <a-button type="primary" html-type="submit">Submit</a-button>
+      <a-form-item :wrapper-col="{ offset: 5, span: 16 }">
+        <a-button type="primary" html-type="submit">Register</a-button>
       </a-form-item>
     </a-form>
 
@@ -73,12 +73,13 @@
 
 <script setup lang="ts">
 
-import { reactive, ref, computed } from 'vue';
+import { reactive, ref, computed, watch, onMounted } from 'vue';
+import { useUserStore, ICEServer } from '@renderer/store/modules/auth/user';
+import { useWebRTCAgent } from '@renderer/store/modules/agent/webrtc-agent';
+import router from '@renderer/router';
 
-export type ICE = {
-  uri: string;
-  protocol: string;
-}
+const user = useUserStore();
+const wrtcAgent = useWebRTCAgent();
 
 const iceAddAllow = computed(() => {
   if (formState.iceServers.length > 2) {
@@ -87,38 +88,83 @@ const iceAddAllow = computed(() => {
 
   if (formState.iceServers.length) {
     const lastICE = formState.iceServers[formState.iceServers.length - 1];
-    if (!lastICE.uri) {
-      return false;
+    if (typeof lastICE === 'string') {
+      return !!lastICE.length;
+    } else {
+      return !!lastICE.address?.length;
     }
   }
 
   return true;
 })
 
+
 const formState = reactive({
-  extension: '10000',
-  password: 'Abcd@54321',
-  domain: 'voiceuat.metechvn.com',
-  gateway: '101.99.20.58:7080',
-  protocol: 'ws',
+  extension: '',
+  password: '',
+  domain: '',
+  gateway: '',
+  protocol: 'wss',
+  iceServers: [],
   iceEnabled: false,
-  iceServers: [] as ICE[],
 });
 
+
+// onMounted(() => {
+//   user.extension = '10000';
+//   user.password = 'Abcd@54321';
+//   user.domain = 'voiceuat.metechvn.com';
+//   user.gateway = '101.99.20.58:7080';
+//   user.iceServers = [];
+//   user.tls = false;
+// });
+
+onMounted(() => {
+  user.extension = '10000';
+  user.password = 'Abcd@54321';
+  user.domain = 'voiceuat.metechvn.com';
+  user.gateway = '101.99.20.58:7080';
+  user.iceServers = [];
+  user.tls = false;
+
+  formState.extension = user.extension;
+  formState.password = user.password;
+  formState.domain = user.domain;
+  formState.gateway = user.gateway;
+  formState.iceServers = user.iceServers;
+  formState.iceEnabled = !!user.iceServers?.length;
+  formState.protocol = user.tls ? 'wss' : 'ws';
+
+});
+
+
 const loginFormRef = ref();
-// const auth = useAuthStore();
 
+const onFinish = () => {
+  const { extension, password, domain, gateway, protocol, iceServers, iceEnabled } = formState;
 
-const onFinish = (values: any) => {
-  // auth.configure(formState.extension, formState.password, formState.domain, formState.protocol, formState.gateway, formState.iceServers);
+  user.extension = extension;
+  user.password = password;
+  user.domain = domain;
+  user.gateway = gateway;
+  
+  user.tls = protocol === 'wss';
 
-  // if (auth.configured) {
-  //   router.push(auth.returnUrl ?? '/').catch(console.error)
-  // }
+  if (iceEnabled) {
+    user.iceServers = iceServers;
+  } else {
+    user.iceServers = [];
+  }
 
+  watch(() => wrtcAgent.registered, async () => {
+    await router.push('/');
+  })
+
+  wrtcAgent.start();
 };
+
 const onFinishFailed = (errorInfo: any) => {
-  console.log(errorInfo);
+  console.error(errorInfo);
 };
 
 
@@ -127,18 +173,11 @@ const removeICE = (index: number) => {
 }
 
 const addICE = () => {
-  if (formState.iceServers.length > 2) {
-    return;
-  }
+  if (!iceAddAllow) return;
 
-  if (formState.iceServers.length) {
-    const lastICE = formState.iceServers[formState.iceServers.length - 1];
-    if (!lastICE.uri) {
-      return;
-    }
-  }
-
-  formState.iceServers.push({ uri: '', protocol: 'stun' });
+  formState.iceServers = [
+    ...formState.iceServers, { address: '', protocol: 'stun' }
+  ]
 }
 
 </script>

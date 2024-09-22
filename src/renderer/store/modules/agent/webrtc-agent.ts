@@ -23,6 +23,7 @@ import {
 
 import { useAudioStore } from '@store/agent/audio';
 import { CallStatus, useCallStore } from "@store/call/call";
+import { useUserStore } from '../auth/user';
 
 interface WebrtcAgent {
     connecting: Ref<boolean>;
@@ -49,16 +50,20 @@ export const useWebRTCAgent = defineStore({
         start: function () {
             if (this.connected) return _ua;
 
-            const socket = new WebSocketInterface('ws://101.99.20.58:7080');
-            const contact = new URI('sip', '10000', defaultDomain, null, { transport: 'ws' }).toString();
+            const user = useUserStore();
+
+            // const socket = new WebSocketInterface('ws://101.99.20.58:7080');
+            const proto = !user.tls ? 'ws' : 'wss';
+            const socket = new WebSocketInterface(`${proto}://${user.gateway}`);
+            const contact = new URI('sip', user.extension, user.domain, null, { transport: 'ws' }).toString();
 
             _ua = new UA({
                 sockets: [socket],
                 uri: contact,
                 contact_uri: contact,
-                password: password,
+                password: user.password,
+                user_agent: 'NowfAgent',
                 register: true,
-                user_agent: 'NowfAgent'
             })
 
             bindConnectionEvents(_ua);
@@ -71,10 +76,11 @@ export const useWebRTCAgent = defineStore({
         call: async function (number: string, headers: { [k: string]: string } = {}) {
             if (!number) return;
 
+            const user = useUserStore();
             const { local } = await useAudioStore().start();
             let target = number;
             if (!number.startsWith('sip:')) {
-                target = `sip:${number}@${defaultDomain}`
+                target = `sip:${number}@${user.domain ?? defaultDomain}`
             }
 
             const extraHeaders = Object.keys(headers).map(k => {
