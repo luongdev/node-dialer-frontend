@@ -19,7 +19,9 @@ function onAppReady() {
   renderProcessGone();
   defaultIpc();
   createMenu()
+
   new InitWindow().initWindow();
+
   if (process.env.NODE_ENV === "development") {
     const { VUEJS_DEVTOOLS } = require("electron-devtools-vendor");
     session.defaultSession.loadExtension(VUEJS_DEVTOOLS, {

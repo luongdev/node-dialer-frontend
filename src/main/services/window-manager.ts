@@ -1,5 +1,5 @@
 import config from "@config/index";
-import { BrowserWindow, dialog } from "electron";
+import { BrowserWindow, dialog, globalShortcut } from "electron";
 import { winURL, loadingURL, getPreloadFile } from "../config/static-path";
 import { useProcessException } from "@main/hooks/exception-hook";
 
@@ -35,7 +35,7 @@ class MainInit {
       webPreferences: {
         sandbox: false,
         webSecurity: false,
-        devTools: process.env.NODE_ENV === "development",
+        devTools: true, // process.env.NODE_ENV === "development",
         scrollBounce: process.platform === "darwin",
         preload: getPreloadFile("preload"),
       },
@@ -46,12 +46,37 @@ class MainInit {
       this.mainWindow.show();
       if (config.UseStartupChart) this.loadWindow.destroy();
     });
-    if (process.env.NODE_ENV === "development") {
-      this.mainWindow.webContents.openDevTools({
-        mode: "undocked",
-        activate: true,
+
+
+    // if (process.env.NODE_ENV === "development") {
+    //   this.mainWindow.webContents.openDevTools({
+    //     mode: "undocked",
+    //     activate: true,
+    //   });
+    // }
+
+
+    globalShortcut.register('Alt+CommandOrControl+L', () => {
+      this.mainWindow.webContents.openDevTools({ mode: "undocked", activate: true });
+    })
+
+    this.mainWindow.on('close', (event: Event) => {
+      const response = dialog.showMessageBoxSync(this.mainWindow, {
+        type: 'question',
+        buttons: ['Thoát', 'Không'],
+        title: 'Xác nhận thoát ứng dụng',
+        message: 'Bạn sẽ không còn nhận được cuộc gọi từ ứng dụng. Bạn vẫn muốn thoát?',
+        defaultId: 1,
+
       });
-    }
+
+      console.log(response);
+
+      if (response == 1) event.preventDefault();
+    })
+
+
+
     this.mainWindow.on("unresponsive", () => {
       dialog
         .showMessageBox(this.mainWindow, {

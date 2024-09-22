@@ -1,7 +1,7 @@
 <template>
-    <div :class="textColor" class="">
+    PING:&nbsp;<span :class="textColor" class="">
         {{ `${typeof requestTime === 'string' ? requestTime : `${requestTime} ms`}` }}
-    </div>
+    </span>
 </template>
 
 <script setup lang="ts">

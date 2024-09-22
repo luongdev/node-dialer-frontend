@@ -53,7 +53,7 @@ export class IpcMainHandleClass implements IIpcMainHandle {
       webPreferences: {
         sandbox: false,
         webSecurity: false,
-        devTools: process.env.NODE_ENV === "development",
+        devTools: true, //process.env.NODE_ENV === "development",
         scrollBounce: process.platform === "darwin",
         preload: getPreloadFile("preload"),
       },
