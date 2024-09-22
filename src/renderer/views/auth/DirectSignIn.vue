@@ -64,7 +64,7 @@
       </a-form-item>
 
       <a-form-item :wrapper-col="{ offset: 5, span: 16 }">
-        <a-button type="primary" html-type="submit">Register</a-button>
+        <a-button type="primary" html-type="submit" :loading="!registerAllow">Register</a-button>
       </a-form-item>
     </a-form>
 
@@ -80,6 +80,8 @@ import router from '@renderer/router';
 
 const user = useUserStore();
 const wrtcAgent = useWebRTCAgent();
+
+const registerAllow = computed(() => !(wrtcAgent.connecting || wrtcAgent.registering));
 
 const iceAddAllow = computed(() => {
   if (formState.iceServers.length > 2) {
@@ -120,9 +122,9 @@ const formState = reactive({
 // });
 
 onMounted(() => {
-  user.extension = '10000';
-  user.password = 'Abcd@54321';
-  user.domain = 'voiceuat.metechvn.com';
+  // user.extension = '10000';
+  // user.password = 'Abcd@54321';
+  // user.domain = 'voiceuat.metechvn.com';
   user.gateway = '101.99.20.58:7080';
   user.iceServers = [];
   user.tls = false;

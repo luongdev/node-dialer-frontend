@@ -28,6 +28,7 @@ import { useUserStore } from '../auth/user';
 interface WebrtcAgent {
     connecting: Ref<boolean>;
     connected: Ref<boolean>;
+    registering: Ref<boolean>;
     registered: Ref<boolean>;
     session?: RTCSession;
 }
@@ -42,9 +43,10 @@ export const useWebRTCAgent = defineStore({
     state: (): WebrtcAgent => {
         const connected = ref(false);
         const connecting = ref(false);
+        const registering = ref(false);
         const registered = ref(false);
 
-        return { connected, registered, connecting }
+        return { connected, registered, connecting, registering };
     },
     actions: {
         start: function () {
@@ -140,6 +142,7 @@ const onConnected = (event: ConnectedEvent) => {
     const wrtcAgent = useWebRTCAgent();
     wrtcAgent.connected = true;
     wrtcAgent.connecting = false;
+    wrtcAgent.registering = true;
 }
 
 const onDisconnected = (event: DisconnectEvent) => {
@@ -156,6 +159,7 @@ const onRegistered = (event: RegisteredEvent) => {
 
     const wrtcAgent = useWebRTCAgent();
     wrtcAgent.registered = true;
+    wrtcAgent.registering = false;
 }
 
 const onUnregistered = (event: UnRegisteredEvent) => {
@@ -170,6 +174,7 @@ const onRegistrationFailed = (event: UnRegisteredEvent) => {
 
     const wrtcAgent = useWebRTCAgent();
     wrtcAgent.registered = false;
+    wrtcAgent.registering = false;
 }
 
 const onRTPSession = async (event: RTCSessionEvent) => {
