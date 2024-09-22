@@ -124,10 +124,10 @@ const formState = reactive({
 onMounted(() => {
   // user.extension = '10000';
   // user.password = 'Abcd@54321';
-  // user.domain = 'voiceuat.metechvn.com';
-  user.gateway = '101.99.20.58:7080';
+  user.domain = 'voiceuat.metechvn.com';
+  user.gateway = 'proxy-dev.metechvn.com:7443';
   user.iceServers = [];
-  user.tls = false;
+  user.tls = true;
 
   formState.extension = user.extension;
   formState.password = user.password;

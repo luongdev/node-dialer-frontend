@@ -40,12 +40,12 @@
     <div class="relative w-full flex justify-end text-red-500" ref="target">
         <a-dropdown>
             <a class="ant-dropdown-link" onclick="return false;">
-                Ext: 10000 <a-icon type="up" />
+                Ext: 10000
             </a>
             <template #overlay>
                 <a-menu style="width: 160px;">
                     <a-menu-item @click="onClickSignOut">
-                        <a-icon type="logout" /> Log Out
+                        Log Out
                     </a-menu-item>
                 </a-menu>
             </template>
