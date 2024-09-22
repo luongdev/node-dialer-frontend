@@ -5,15 +5,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, toRefs, defineProps, ref } from 'vue';
+import { computed, onMounted, toRefs, defineProps, ref } from 'vue';
 import Timer from '@renderer/utils/timer';
 
 const props = defineProps(['time', 'interval', 'url']);
-
 const { time, interval, url } = toRefs(props);
-
 const requestTime = ref(null);
-
 
 onMounted(async () => {
     await pingUrl();
@@ -32,7 +29,7 @@ const textColor = computed(() => {
         return 'text-yellow-500';
     }
 
-    return 'red';
+    return 'text-red-500';
 })
 
 const pingUrl = async () => {

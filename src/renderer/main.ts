@@ -23,7 +23,7 @@ app.use(router);
 app.use(store);
 app.use(antd);
 
-router.push('/')
+router.push('/signin?type=direct')
 
 errorHandler(app);
 
