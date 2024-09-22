@@ -5,7 +5,7 @@
                 <DropdownStatus />
             </div>
             <div class="w-full flex justify-center">
-                <Pinger v-if="ping" :interval="5000" :time="100" :url="pingUrl" />
+                <Pinger v-if="ping" :interval="15000" :time="100" :url="pingUrl" />
             </div>
             <div class="flex items-center gap-3 2xsm:gap-7 w-full">
                 <!-- User Area -->

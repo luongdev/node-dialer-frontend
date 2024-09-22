@@ -9,9 +9,9 @@
         <p class="text-2xl">{{ call.to }}</p>
         <p class="text-lg text-gray-500 mt-2">{{ call.from }}</p>
       </div>
-      <div class="text-center mt-4">
+      <!-- <div class="text-center mt-4">
         <p v-if="endTimer" class="text-xl text-gray-700 font-bold">{{ duration }}</p>
-      </div>
+      </div> -->
       <div class="text-center mt-4">
         <p class="text-xl text-gray-700 font-bold">{{ callStatusLabel }}</p>
       </div>
@@ -29,11 +29,7 @@
 import { CallStatus, useCallStore } from '@renderer/store/modules/call/call';
 import { computed, ref } from 'vue';
 
-import { useDuration } from '@renderer/utils/reusable/duration';
 import { useWebRTCAgent } from '@renderer/store/modules/agent/webrtc-agent';
-
-const endTimer = ref(false);
-const { duration } = useDuration();
 
 const call = useCallStore();
 const wrtcAgent = useWebRTCAgent();

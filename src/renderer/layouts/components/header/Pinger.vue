@@ -5,18 +5,22 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, toRefs, defineProps, ref } from 'vue';
-import Timer from '@renderer/utils/timer';
+import { computed, onMounted, toRefs, defineProps, ref, onUnmounted } from 'vue';
 
 const props = defineProps(['time', 'interval', 'url']);
 const { time, interval, url } = toRefs(props);
 const requestTime = ref(null);
 
-onMounted(async () => {
-    await pingUrl();
+let timer: NodeJS.Timeout;
 
-    Timer.interval(interval.value, async () => await pingUrl());
+onMounted(() => {
+    pingUrl();
+    timer = setInterval(pingUrl, interval.value);
 });
+
+onUnmounted(() => {
+    clearInterval(timer);
+})
 
 const textColor = computed(() => {
     if (typeof requestTime.value === 'string') {
@@ -32,11 +36,15 @@ const textColor = computed(() => {
     return 'text-red-500';
 })
 
-const pingUrl = async () => {
-    const startTime = Date.now();
-    fetch(url.value, { method: 'HEAD' }).finally(() => {
-        const endTime = Date.now();
-        requestTime.value = endTime - startTime;
-    })
+const pingUrl = () => {
+    try {
+        const startTime = Date.now();
+        fetch(url.value, { method: 'HEAD' }).catch(() => { }).finally(() => {
+            const endTime = Date.now();
+            requestTime.value = endTime - startTime;
+        });
+    } catch (e: any) {
+
+    }
 }
 </script>

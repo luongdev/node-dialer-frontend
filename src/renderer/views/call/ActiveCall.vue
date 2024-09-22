@@ -35,7 +35,7 @@
 </template>
 
 <script lang="ts" setup>
-import { defineProps, onMounted, watch } from "vue";
+import { defineProps, onMounted, onUnmounted, watch } from "vue";
 import { useDuration } from "@renderer/utils/reusable/duration";
 import { useWebRTCAgent } from "@renderer/store/modules/agent/webrtc-agent";
 import { useCallStore } from "@renderer/store/modules/call/call";
@@ -46,9 +46,9 @@ const { startTime } = defineProps({
   startTime: { type: Number, default: () => Date.now() },
 })
 
-const { duration, start } = useDuration();
+const { duration, start, stop } = useDuration();
 onMounted(() => start(startTime));
-
+onUnmounted(() => stop());
 
 const wrtcAgent = useWebRTCAgent();
 
