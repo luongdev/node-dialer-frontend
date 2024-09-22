@@ -10,6 +10,6 @@ import DirectSignIn from './DirectSignIn.vue';
 import { ref } from 'vue';
 
 const { query: { type } } = router.currentRoute.value;
-const refType = ref(type);
+const refType = ref(type ?? 'direct');
 
 </script>

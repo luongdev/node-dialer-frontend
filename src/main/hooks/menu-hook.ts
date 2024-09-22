@@ -41,18 +41,18 @@ const menu: Array<(MenuItemConstructorOptions) | (MenuItem)> = [
 
 export const useMenu = () => {
     const createMenu = () => {
-        if (process.env.NODE_ENV === "development") {
-            menu.push({
-                label: "Development",
-                submenu: [
-                    {
-                        label: "DevTools",
-                        accelerator: "CmdOrCtrl+I",
-                        role: "toggleDevTools",
-                    },
-                ],
-            });
-        }
+        // if (process.env.NODE_ENV === "development") {
+        menu.push({
+            label: "Development",
+            submenu: [
+                {
+                    label: "DevTools",
+                    accelerator: "CmdOrCtrl+I",
+                    role: "toggleDevTools",
+                },
+            ],
+        });
+        // }
         const menuTemplate = Menu.buildFromTemplate(menu);
         Menu.setApplicationMenu(menuTemplate);
     }

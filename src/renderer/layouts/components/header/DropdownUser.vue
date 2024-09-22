@@ -1,20 +1,8 @@
-<script setup lang="ts">
-import { onClickOutside } from '@vueuse/core'
-import { ref } from 'vue'
-
-const target = ref(null)
-const dropdownOpen = ref(false)
-
-onClickOutside(target, () => {
-    dropdownOpen.value = false
-})
-</script>
-
 <template>
-    <div class="relative w-full flex justify-end text-red-500" ref="target">
+    <!-- <div class="relative w-full flex justify-end text-red-500" ref="target">
         <router-link class="flex items-center gap-4" to="#" @click.prevent="dropdownOpen = !dropdownOpen">
             <span class="text-right block">
-                <span class="block text-md font-medium">Ext: 1000</span>
+                <span class="block text-md font-medium">Ext: {{ user.extension }}</span>
             </span>
             <svg :class="dropdownOpen && 'rotate-180'" class="hidden fill-current sm:block" width="12" height="8"
                 viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -25,11 +13,9 @@ onClickOutside(target, () => {
             </svg>
         </router-link>
 
-        <!-- Dropdown Start -->
-        <div v-show="dropdownOpen"
-            class="absolute right-0 mt-8 flex flex-col rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-            <button
-                class="flex items-center gap-3.5 py-4 px-6 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base">
+        <div v-show="dropdownOpen" class="
+                absolute right-0 mt-8 flex flex-col rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+            <button class="flex items-center gap-3.5 py-4 px-6 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base" @click="console.log">
                 <svg class="fill-current" width="22" height="22" viewBox="0 0 22 22" fill="none"
                     xmlns="http://www.w3.org/2000/svg">
                     <path d="M15.5375 0.618744H11.6531C10.7594 0.618744 10.0031 1.37499 10.0031 
@@ -50,6 +36,49 @@ onClickOutside(target, () => {
                 Log Out
             </button>
         </div>
-        <!-- Dropdown End -->
+    </div> -->
+    <div class="relative w-full flex justify-end text-red-500" ref="target">
+        <a-dropdown>
+            <a class="ant-dropdown-link" onclick="return false;">
+                Ext: 10000 <a-icon type="up" />
+            </a>
+            <template #overlay>
+                <a-menu style="width: 160px;">
+                    <a-menu-item @click="onClickSignOut">
+                        <a-icon type="logout" /> Log Out
+                    </a-menu-item>
+                </a-menu>
+            </template>
+        </a-dropdown>
     </div>
 </template>
+
+<script setup lang="ts">
+import { ref, watch } from 'vue';
+import { onClickOutside } from '@vueuse/core';
+
+import { useUserStore } from '@renderer/store/modules/auth/user';
+import { useWebRTCAgent } from '@renderer/store/modules/agent/webrtc-agent';
+import router from '@renderer/router';
+
+const user = useUserStore();
+const wrtcAgent = useWebRTCAgent();
+
+const target = ref(null);
+const dropdownOpen = ref(false);
+
+onClickOutside(target, () => {
+    dropdownOpen.value = false;
+});
+
+const onClickSignOut = () => {
+    wrtcAgent.stop();
+    user.clear();
+}
+
+
+watch(() => wrtcAgent.registered, (val) => {
+    if (!val) router.push('/signin');
+})
+
+</script>

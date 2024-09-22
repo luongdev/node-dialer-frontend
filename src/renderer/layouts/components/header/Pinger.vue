@@ -14,7 +14,7 @@ const requestTime = ref(null);
 
 onMounted(async () => {
     await pingUrl();
-    
+
     Timer.interval(interval.value, async () => await pingUrl());
 });
 
@@ -33,17 +33,10 @@ const textColor = computed(() => {
 })
 
 const pingUrl = async () => {
-    try {
-        const startTime = Date.now();
-        const response = await fetch(url.value, { method: 'HEAD' });
-        if (response.ok) {
-            const endTime = Date.now();
-            requestTime.value = endTime - startTime;
-        } else {
-            requestTime.value = '!!!';
-        }
-    } catch (error) {
-        requestTime.value = '!!!';
-    }
+    const startTime = Date.now();
+    fetch(url.value, { method: 'HEAD' }).finally(() => {
+        const endTime = Date.now();
+        requestTime.value = endTime - startTime;
+    })
 }
 </script>
