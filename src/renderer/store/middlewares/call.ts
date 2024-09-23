@@ -17,15 +17,12 @@ export const callStoreMiddleware: PiniaPlugin = ({ store }) => {
             case CallStatus.S_ANSWERED:
                 router?.push('/active-call')?.catch(console.error);
                 break;
-            case CallStatus.S_ERROR:
+            default:
                 setTimeout(() => {
                     const back = router.currentRoute?.value?.redirectedFrom;
 
                     router?.push(back ?? '/')?.catch(console.error);
                 }, 3000);
-                break;
-            default:
-                router?.push('/')?.catch(console.error);
                 break;
         }
     });
