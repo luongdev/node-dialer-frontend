@@ -132,9 +132,9 @@ onMounted(() => {
   // user.extension = '10000';
   // user.password = 'Abcd@54321';
   user.domain = 'voiceuat.metechvn.com';
-  user.gateway = 'proxy-dev.metechvn.com:7443';
+  user.gateway = '103.229.40.170:7080';
   user.iceServers = [];
-  user.tls = true;
+  user.tls = false;
 
   formState.extension = user.extension;
   formState.password = user.password;

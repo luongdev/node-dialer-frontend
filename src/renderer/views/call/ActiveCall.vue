@@ -14,13 +14,13 @@
         <p class="text-xl font-bold">{{ callStatusLabel }}</p>
       </div>
 
-      <div class="flex justify-center w-full px-6 mt-10">
+      <div v-if="'TERMINATED' !== call.status" class="flex justify-center w-full px-6 mt-10">
         <a-button danger type="primary" size="large" @click="callHangup">
           Hangup
         </a-button>
       </div>
 
-      <div class="flex justify-around w-full px-6 mt-8">
+      <div v-if="'TERMINATED' !== call.status" class="flex justify-around w-full px-6 mt-8">
         <a-button type="default" size="large" class="bg-gray-200 hover:bg-gray-300 text-gray-600 text-lg p-2 mx-1">
           Mute
         </a-button>

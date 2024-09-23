@@ -10,9 +10,10 @@
       <a-divider style="margin: 4px 0"/>
       <a-space class="w-full flex justify-around">
         <a-input
-            ref="inputRef" placeholder="Nhập số" class="w-full"
-            v-model:value="name" :status="nameStatus"
-        />
+            placeholder="Nhập số" class="w-full"
+            v-model:value="name.value"
+            :status="name.status"
+            @keyup.enter="addItem"/>
         <a-button type="text" @click="addItem">
           <template #icon>
             <span class="flex justify-between items-center">
@@ -28,7 +29,7 @@
   </a-select>
 </template>
 <script lang="ts" setup>
-import {defineComponent, ref} from 'vue';
+import {defineComponent, reactive, ref} from 'vue';
 import {useUserStore} from "@store/auth/user";
 
 const regex = /^\d{8,12}$/;
@@ -43,9 +44,7 @@ const VNodes = defineComponent({
 const user = useUserStore();
 
 const items = ref(user.listDID);
-const inputRef = ref();
-const name = ref();
-const nameStatus = ref();
+const name = reactive({value: '', status: ''});
 
 const value = ref(user.currentDID);
 
@@ -59,15 +58,13 @@ const addItem = (e: any) => {
   e.preventDefault();
 
   if (!name.value || items.value.includes(name.value) || !regex.test(name.value)) {
-    nameStatus.value = 'error';
+    name.status = 'error';
     return;
   }
 
   items.value.push(name.value);
   name.value = '';
-  nameStatus.value = '';
-
-  inputRef.value?.focus();
+  name.status = '';
 };
 </script>
 
