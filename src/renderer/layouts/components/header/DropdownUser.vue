@@ -1,5 +1,5 @@
 <template>
-  <div class="relative w-full flex justify-end text-red-500" ref="target">
+  <div class="relative w-full flex justify-end text-green-500" ref="target">
     <a-dropdown>
       <a class="ant-dropdown-link" onclick="return false;">
         Ext: 10000

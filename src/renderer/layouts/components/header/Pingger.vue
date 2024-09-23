@@ -1,5 +1,5 @@
 <template>
-    PING:&nbsp;<span :class="textColor">
+    Độ trễ:&nbsp;<span :class="textColor">
         {{ `${typeof requestTime === 'string' ? requestTime : `${requestTime} ms`}` }}
     </span>
 </template>
