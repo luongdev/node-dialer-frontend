@@ -5,7 +5,8 @@ export enum CallStatus {
     S_CONNECTING = 'CONNECTING',
     S_RINGING = 'RINGING',
     S_ANSWERED = 'ANSWERED',
-    S_TERMINATED = 'TERMINATED'
+    S_TERMINATED = 'TERMINATED',
+    S_ERROR = 'ERROR',
 }
 
 export interface CallState {
@@ -16,12 +17,13 @@ export interface CallState {
     to?: string;
     startTime?: number;
     answerTime?: number;
+    error?: string;
 }
 
 export const useCallStore = defineStore({
     id: 'call',
     state: (): CallState => {
-        return {id: '', status: ''}
+        return {id: '', status: '', error: ''};
     },
     actions: {
         init: function (id: string, from: string, to: string, inbound: boolean) {
@@ -35,6 +37,7 @@ export const useCallStore = defineStore({
             this.from = from;
             this.to = to;
             this.startTime = Date.now();
+            this.error = '';
         }
     },
 });

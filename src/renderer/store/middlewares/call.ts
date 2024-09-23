@@ -2,7 +2,7 @@ import { PiniaPlugin } from "pinia";
 import { watch } from "vue";
 import { CallStatus } from "@store/call/call";
 
-import router from "@renderer/router";
+import router from '@renderer/router';
 
 export const callStoreMiddleware: PiniaPlugin = ({ store }) => {
     if (store.$id !== 'call') return;
@@ -12,13 +12,20 @@ export const callStoreMiddleware: PiniaPlugin = ({ store }) => {
             case CallStatus.S_NEW:
             case CallStatus.S_CONNECTING:
             case CallStatus.S_RINGING:
-                router.push(store.inbound ? '/incoming-call' : '/outgoing-call').catch(console.error);
+                router?.push(store.inbound ? '/incoming-call' : '/outgoing-call')?.catch(console.error);
                 break;
             case CallStatus.S_ANSWERED:
-                router.push('/active-call').catch(console.error);
+                router?.push('/active-call')?.catch(console.error);
+                break;
+            case CallStatus.S_ERROR:
+                setTimeout(() => {
+                    const back = router.currentRoute?.value?.redirectedFrom;
+
+                    router?.push(back ?? '/')?.catch(console.error);
+                }, 3000);
                 break;
             default:
-                router.push('/').catch(console.error);
+                router?.push('/')?.catch(console.error);
                 break;
         }
     });

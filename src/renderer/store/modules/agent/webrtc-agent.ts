@@ -97,8 +97,6 @@ export const useWebRTCAgent = defineStore({
                 sessionTimersExpires: 120,
                 rtcOfferConstraints: {offerToReceiveAudio: true, offerToReceiveVideo: false}
             });
-
-
         },
         answer: async function () {
             if (!this.session) return;
@@ -217,6 +215,7 @@ const onRTPSession = async (event: RTCSessionEvent) => {
 
     // Outbound call trigger connection
     session.on('connecting', onSessionConnecting);
+    session.on('sending', (e) => console.debug('UA[onSessionSending]: ', e));
 
     // Inbound call trigger progress & peerconnection
     session.on('progress', onSessionProgress);
@@ -268,6 +267,12 @@ const onSessionEnded = (event: EndEvent) => {
     const call = useCallStore();
     call.id = '';
     call.status = '';
+
+    if (event.cause) {
+        call.error = event.cause;
+        console.log(event.cause);
+        call.status = CallStatus.S_ERROR;
+    }
 }
 
 const bindConnectionEvents = (ua: UA) => {

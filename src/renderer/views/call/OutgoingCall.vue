@@ -56,6 +56,8 @@ const callStatusLabel = computed(() => {
       return 'Đã kết nối';
     case CallStatus.S_TERMINATED:
       return 'Đã kết thúc';
+    case CallStatus.S_ERROR:
+      return 'Lỗi kết nối';
     default:
       return 'Đang kết nối';
   }
