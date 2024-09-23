@@ -1,4 +1,4 @@
-import { defineStore } from "pinia";
+import {defineStore} from "pinia";
 
 export enum CallStatus {
     S_NEW = 'NEW',
@@ -21,10 +21,10 @@ export interface CallState {
 export const useCallStore = defineStore({
     id: 'call',
     state: (): CallState => {
-        return { id: '', status: '' }
+        return {id: '', status: ''}
     },
     actions: {
-        init: async function (id: string, from: string, to: string, inbound: boolean) {
+        init: function (id: string, from: string, to: string, inbound: boolean) {
             if (this.id.length) {
                 return;
             }

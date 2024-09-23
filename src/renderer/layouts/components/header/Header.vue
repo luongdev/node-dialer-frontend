@@ -21,7 +21,7 @@ import { ref, watch } from 'vue';
 
 import DropdownUser from './DropdownUser.vue'
 import DropdownStatus from "./DropdownStatus.vue";
-import Pinger from './Pinger.vue';
+import Pinger from './Pingger.vue';
 import { useUserStore } from '@renderer/store/modules/auth/user';
 
 const user = useUserStore();

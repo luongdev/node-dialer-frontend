@@ -1,6 +1,6 @@
-import { defineStore } from 'pinia';
-import { Ref, ref, watch } from 'vue';
-import { UA, WebSocketInterface, URI } from 'jssip';
+import {defineStore} from 'pinia';
+import {Ref, ref, watch} from 'vue';
+import {UA, WebSocketInterface, URI} from 'jssip';
 
 import router from '@renderer/router';
 import {
@@ -21,15 +21,16 @@ import {
     RTCSessionEvent,
 } from 'jssip/lib/UA';
 
-import { useAudioStore } from '@store/agent/audio';
-import { CallStatus, useCallStore } from "@store/call/call";
-import { useUserStore } from '../auth/user';
+import {useAudioStore} from '@store/agent/audio';
+import {CallStatus, useCallStore} from "@store/call/call";
+import {useUserStore} from '../auth/user';
 
 interface WebrtcAgent {
     connecting: Ref<boolean>;
     connected: Ref<boolean>;
     registering: Ref<boolean>;
     registered: Ref<boolean>;
+    error: Ref<string>;
     session?: RTCSession;
 }
 
@@ -45,8 +46,9 @@ export const useWebRTCAgent = defineStore({
         const connecting = ref(false);
         const registering = ref(false);
         const registered = ref(false);
+        const error = ref('');
 
-        return { connected, registered, connecting, registering };
+        return {connected, registered, connecting, registering, error};
     },
     actions: {
         start: function () {
@@ -57,7 +59,7 @@ export const useWebRTCAgent = defineStore({
             // const socket = new WebSocketInterface('ws://101.99.20.58:7080');
             const proto = !user.tls ? 'ws' : 'wss';
             const socket = new WebSocketInterface(`${proto}://${user.gateway}`);
-            const contact = new URI('sip', user.extension, user.domain, null, { transport: 'ws' }).toString();
+            const contact = new URI('sip', user.extension, user.domain, null, {transport: 'ws'}).toString();
 
             _ua = new UA({
                 sockets: [socket],
@@ -79,7 +81,7 @@ export const useWebRTCAgent = defineStore({
             if (!number) return;
 
             const user = useUserStore();
-            const { local } = await useAudioStore().start();
+            const {local} = await useAudioStore().start();
             let target = number;
             if (!number.startsWith('sip:')) {
                 target = `sip:${number}@${user.domain ?? defaultDomain}`
@@ -93,7 +95,7 @@ export const useWebRTCAgent = defineStore({
                 extraHeaders,
                 mediaStream: local,
                 sessionTimersExpires: 120,
-                rtcOfferConstraints: { offerToReceiveAudio: true, offerToReceiveVideo: false }
+                rtcOfferConstraints: {offerToReceiveAudio: true, offerToReceiveVideo: false}
             });
 
 
@@ -102,12 +104,12 @@ export const useWebRTCAgent = defineStore({
             if (!this.session) return;
 
             const audio = useAudioStore();
-            const { local } = await audio.start();
+            const {local} = await audio.start();
 
             this.session.answer({
                 mediaStream: local,
-                mediaConstraints: { audio: true, video: false },
-                rtcAnswerConstraints: { offerToReceiveAudio: true, offerToReceiveVideo: false },
+                mediaConstraints: {audio: true, video: false},
+                rtcAnswerConstraints: {offerToReceiveAudio: true, offerToReceiveVideo: false},
             })
         },
         terminate: function (code?: number, causes?: string) {
@@ -124,6 +126,11 @@ export const useWebRTCAgent = defineStore({
                     }
                 })
             }
+
+            this.connecting = false;
+            this.connected = false;
+            this.registering = false;
+            this.registered = false;
         },
     }
 })
@@ -143,6 +150,7 @@ const onConnected = (event: ConnectedEvent) => {
     wrtcAgent.connected = true;
     wrtcAgent.connecting = false;
     wrtcAgent.registering = true;
+    wrtcAgent.error = '';
 }
 
 const onDisconnected = (event: DisconnectEvent) => {
@@ -152,6 +160,8 @@ const onDisconnected = (event: DisconnectEvent) => {
     wrtcAgent.connected = false;
     wrtcAgent.connecting = false;
     wrtcAgent.registered = false;
+    wrtcAgent.registering = false;
+    wrtcAgent.error = '';
 }
 
 const onRegistered = (event: RegisteredEvent) => {
@@ -173,6 +183,11 @@ const onRegistrationFailed = (event: UnRegisteredEvent) => {
     console.debug('UA[onRegistrationFailed]: ', event);
 
     const wrtcAgent = useWebRTCAgent();
+    wrtcAgent.stop();
+
+    event.response.status_code === 403 && (wrtcAgent.error = 'Thông tin đăng nhập chưa đúng');
+    event.response.status_code === 500 && (wrtcAgent.error = 'Lỗi hệ thống, vui lòng thử lại sau');
+
     wrtcAgent.registered = false;
     wrtcAgent.registering = false;
 }
@@ -180,7 +195,7 @@ const onRegistrationFailed = (event: UnRegisteredEvent) => {
 const onRTPSession = async (event: RTCSessionEvent) => {
     console.debug('UA[onRTPSession]: ', event);
 
-    const { request: { from, to }, session } = event || {};
+    const {request: {from, to}, session} = event || {};
     if (!from || !to || !session) {
         console.error('UA[onRTPSession] invalid request ', event);
         return;
@@ -223,7 +238,7 @@ const onSessionAccepted = async (event: (IncomingEvent | OutgoingEvent)) => {
 
     call.status = CallStatus.S_ANSWERED;
     call.answerTime = Date.now();
-    const { remote } = await audio.start();
+    const {remote} = await audio.start();
     wrtcAgent.session?.connection?.getReceivers()?.forEach(receiver => {
         if (receiver.track) remote.addTrack(receiver.track);
     })
@@ -241,7 +256,7 @@ const onSessionProgress = (event: IncomingEvent | OutgoingEvent) => {
 const onSessionConfirmed = (event: IncomingAckEvent | OutgoingAckEvent) => {
     console.debug('UA[onSessionConfirmed]: ', event);
     const call = useCallStore();
-    
+
     if (CallStatus.S_ANSWERED !== call.status) {
         call.status = CallStatus.S_ANSWERED;
         call.answerTime = Date.now();

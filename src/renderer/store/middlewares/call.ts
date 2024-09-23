@@ -1,10 +1,12 @@
 import { PiniaPlugin } from "pinia";
 import { watch } from "vue";
-import { CallStatus } from "../modules/call/call";
+import { CallStatus } from "@store/call/call";
 
 import router from "@renderer/router";
 
 export const callStoreMiddleware: PiniaPlugin = ({ store }) => {
+    if (store.$id !== 'call') return;
+
     watch(() => store.status, (status: CallStatus) => {
         switch (status) {
             case CallStatus.S_NEW:

@@ -1,5 +1,5 @@
-import { createApp } from "vue";
-import { createPinia } from "pinia";
+import {createApp} from "vue";
+import {createPinia} from "pinia";
 
 import "./styles/index.css";
 import 'ant-design-vue/dist/reset.css';
@@ -10,20 +10,19 @@ import router from "./router";
 
 import antd from 'ant-design-vue';
 
-import { errorHandler } from "./error";
+import {errorHandler} from "./error";
 import "./utils/hackIpcRenderer";
-import { callStoreMiddleware } from "./store/middlewares/call";
+import {callStoreMiddleware} from "@renderer/store/middlewares/call";
+import {audioStoreMiddleware} from "@renderer/store/middlewares/audio";
 
 const app = createApp(App);
 const store = createPinia();
 
-store.use(callStoreMiddleware);
+store.use(callStoreMiddleware).use(audioStoreMiddleware);
 
 app.use(router);
 app.use(store);
 app.use(antd);
-
-router.push('/signin?type=direct')
 
 errorHandler(app);
 

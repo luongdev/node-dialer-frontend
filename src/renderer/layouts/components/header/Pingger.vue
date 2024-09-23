@@ -1,11 +1,11 @@
 <template>
-    PING:&nbsp;<span :class="textColor" class="">
+    PING:&nbsp;<span :class="textColor">
         {{ `${typeof requestTime === 'string' ? requestTime : `${requestTime} ms`}` }}
     </span>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, toRefs, defineProps, ref, onUnmounted } from 'vue';
+import {computed, onMounted, toRefs, defineProps, ref, onUnmounted, watch} from 'vue';
 
 const props = defineProps(['time', 'interval', 'url']);
 const { time, interval, url } = toRefs(props);
@@ -13,14 +13,24 @@ const requestTime = ref(null);
 
 let timer: NodeJS.Timeout;
 
-onMounted(() => {
-    pingUrl();
-    timer = setInterval(pingUrl, interval.value);
-});
+onMounted(() => startPingger());
 
 onUnmounted(() => {
     clearInterval(timer);
 })
+
+watch(url, (newUrl: string) => {
+  if (!newUrl?.length) {
+    clearInterval(timer);
+  } else {
+    startPingger();
+  }
+})
+
+const startPingger = () => {
+  pingUrl();
+  timer = setInterval(pingUrl, interval.value);
+}
 
 const textColor = computed(() => {
     if (typeof requestTime.value === 'string') {
