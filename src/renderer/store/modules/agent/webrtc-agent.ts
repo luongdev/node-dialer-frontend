@@ -87,6 +87,10 @@ export const useWebRTCAgent = defineStore({
                 target = `sip:${number}@${user.domain ?? defaultDomain}`
             }
 
+            if (user.currentDID?.length) {
+                headers['Dialed-Number'] = user.currentDID;
+            }
+
             const extraHeaders = Object.keys(headers).map(k => {
                 return `X-${k}: ${headers[k]}`;
             })
@@ -263,15 +267,14 @@ const onSessionConfirmed = (event: IncomingAckEvent | OutgoingAckEvent) => {
 }
 
 const onSessionEnded = (event: EndEvent) => {
-    console.debug('UA[onSessionEnded]: ', event);
+    console.debug(`UA[onSessionEnded] ${event.cause}: `, event);
     const call = useCallStore();
-    call.id = '';
-    call.status = '';
 
-    if (event.cause) {
+    if ('Terminated' !== event.cause) {
         call.error = event.cause;
-        console.log(event.cause);
         call.status = CallStatus.S_ERROR;
+    } else {
+        call.status = CallStatus.S_TERMINATED;
     }
 }
 

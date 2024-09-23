@@ -1,8 +1,8 @@
-import { RemovableRef, Serializer } from "@vueuse/core";
-import { useStorage } from "@vueuse/core";
-import { defineStore } from "pinia";
+import {RemovableRef, Serializer} from "@vueuse/core";
+import {useStorage} from "@vueuse/core";
+import {defineStore} from "pinia";
 
-import { encrypt, decrypt } from '@renderer/utils/crypto';
+import {encrypt, decrypt} from '@renderer/utils/crypto';
 
 export type ICEServer = {
     protocol: 'turn' | 'stun';
@@ -18,6 +18,8 @@ export interface UserState {
     gateway: RemovableRef<string>;
     tls: RemovableRef<boolean>;
     iceServers: RemovableRef<(ICEServer | string)[]>;
+    currentDID: RemovableRef<string>;
+    listDID: RemovableRef<string[]>;
 }
 
 export const StoredEncryptSerializer: Serializer<string> = {
@@ -54,11 +56,14 @@ export const useUserStore = defineStore({
         const extension = useStorage<string>('reg_extension', null);
         const domain = useStorage<string>('reg_domain', null);
         const gateway = useStorage<string>('reg_gateway', null);
-        const tls = useStorage<boolean>('reg_tls', null, localStorage, { serializer: StoredJSONSerializer });
-        const iceServers = useStorage<(ICEServer | string)[]>('reg_iceServers', [], localStorage, { serializer: StoredJSONSerializer });
-        const password = useStorage<string>('reg_password', null, localStorage, { serializer: StoredEncryptSerializer });
+        const tls = useStorage<boolean>('reg_tls', null, localStorage, {serializer: StoredJSONSerializer});
+        const iceServers = useStorage<(ICEServer | string)[]>('reg_iceServers', [], localStorage, {serializer: StoredJSONSerializer});
+        const password = useStorage<string>('reg_password', null, localStorage, {serializer: StoredEncryptSerializer});
 
-        return { extension, domain, gateway, tls, iceServers, password };
+        const currentDID = useStorage<string>('call_currentDID', null);
+        const listDID = useStorage('call_listDID', [], localStorage, {serializer: StoredJSONSerializer});
+
+        return {extension, domain, gateway, tls, iceServers, password, currentDID, listDID};
     },
     actions: {
         clear: function () {
@@ -68,6 +73,7 @@ export const useUserStore = defineStore({
             this.tls = null;
             this.iceServers = null;
             this.password = null;
+            this.currentDID = null;
         },
         validate: function () {
             return this.extension && this.domain && this.gateway && this.password;

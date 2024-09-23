@@ -61,5 +61,5 @@ const callStatusLabel = computed(() => {
     default:
       return 'Đang kết nối';
   }
-})
+});
 </script>
