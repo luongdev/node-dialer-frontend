@@ -1,5 +1,7 @@
 import {PiniaPlugin, Store} from "pinia";
-import router from "@renderer/router";
+import {useRouter} from "vue-router";
+
+let timer: NodeJS.Timeout;
 
 export const audioStoreMiddleware: PiniaPlugin = ({store}) => {
     if (store.$id !== 'audio-stream') return;
@@ -21,7 +23,7 @@ const onAudioStart = async (store: any) => {
         const audioInputs = devices.find(device => device.kind === 'audioinput');
 
         if (!audioInputs) {
-            router
+            useRouter()
                 .push('/error?error=Microphone&message=Bạn phải có microphone để thực hiện cuộc gọi')
                 .catch(console.error);
         } else {
@@ -29,10 +31,22 @@ const onAudioStart = async (store: any) => {
             await store.start();
         }
     }
+
+    timer = setInterval(async () => {
+        try {
+            await navigator.mediaDevices.getUserMedia({audio: true});
+            store.error = '';
+        } catch (e: any) {
+            store.error = e.message;
+            useRouter()
+                .push('/error?error=Microphone&message=Bạn phải có microphone để thực hiện cuộc gọi')
+                .catch(console.error);
+        }
+    }, 10000);
 }
 
 const onAudioStop = async (_) => {
-
+    clearInterval(timer);
 }
 
 const onAudioPlay = async (_) => {

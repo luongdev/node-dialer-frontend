@@ -3,6 +3,7 @@ import {defineStore} from "pinia";
 export interface AudioState {
     remote?: MediaStream;
     local?: MediaStream;
+    error?: string;
 }
 
 export const useAudioStore = defineStore({
@@ -11,14 +12,23 @@ export const useAudioStore = defineStore({
         return {
             remote: undefined,
             local: undefined,
+            error: '',
         }
     },
     actions: {
         start: async function (): Promise<AudioState> {
-            this.local = await navigator.mediaDevices.getUserMedia({audio: true});
-            this.remote = new MediaStream();
+            try {
+                this.local = await navigator.mediaDevices.getUserMedia({audio: true});
+                this.remote = new MediaStream();
 
-            return { local: this.local, remote: this.remote };
+                this.error = '';
+
+                return { local: this.local, remote: this.remote };
+            } catch (e: any) {
+                this.error = e.message;
+            }
+
+            return { local: undefined, remote: undefined };
         },
         play(remoteStream?: MediaStream) {
             if (remoteStream) {
@@ -32,6 +42,8 @@ export const useAudioStore = defineStore({
         stop: function () {
             this.local?.getTracks().forEach((track: any) => track.stop());
             this.remote?.getTracks().forEach((track: any) => track.stop());
+
+            this.error = '';
         }
     }
 })
