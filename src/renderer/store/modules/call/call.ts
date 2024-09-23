@@ -18,6 +18,7 @@ export interface CallState {
     startTime?: number;
     answerTime?: number;
     error?: string;
+    timer?: NodeJS.Timeout;
 }
 
 export const useCallStore = defineStore({

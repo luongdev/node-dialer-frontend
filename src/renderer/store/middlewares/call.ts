@@ -4,27 +4,39 @@ import { CallStatus } from "@store/call/call";
 
 import router from '@renderer/router';
 
+const { ipcRendererChannel } = window;
+
 export const callStoreMiddleware: PiniaPlugin = ({ store }) => {
     if (store.$id !== 'call') return;
 
-    watch(() => store.status, (status: CallStatus) => {
-        switch (status) {
+    watch(() => store.status, (crntStatus, prevStatus) => {
+        console.log('Day la call status: ', { prev: prevStatus, status: crntStatus });
+
+
+        switch (crntStatus) {
             case CallStatus.S_NEW:
             case CallStatus.S_CONNECTING:
             case CallStatus.S_RINGING:
-                router?.push(store.inbound ? '/incoming-call' : '/outgoing-call')?.catch(console.error);
+                const routerUrl = store.inbound ? '/incoming-call' : '/outgoing-call';
+                router?.push(routerUrl)?.catch(console.error);
+
+                if (store.inbound) {
+                    ipcRendererChannel.FocusMainWindow.invoke(routerUrl);
+                }
                 break;
             case CallStatus.S_ANSWERED:
-                router?.push('/active-call')?.catch(console.error);
+                if (prevStatus?.length && CallStatus.S_TERMINATED !== prevStatus) {
+                    router?.push('/active-call')?.catch(console.error);
+                }
                 break;
             default:
-                setTimeout(() => {
-                    const back = router.currentRoute?.value?.redirectedFrom;
-
-                    router?.push(back ?? '/')?.catch(console.error);
-                    store.id = '';
-                    store.status = '';
-                }, 3000);
+                if (prevStatus?.length) {
+                    store.timer = setTimeout(() => {
+                        store.timer = null;
+                        const back = router.currentRoute?.value?.redirectedFrom;
+                        router?.push(back ?? '/')?.catch(console.error);
+                    }, 3000);
+                }
                 break;
         }
     });

@@ -206,6 +206,8 @@ const onRTPSession = async (event: RTCSessionEvent) => {
     const call = useCallStore();
     const wrtcAgent = useWebRTCAgent();
 
+    if (call.timer !== null && call.timer !== undefined) clearTimeout(call.timer);
+
     wrtcAgent.session = session;
     call.init(session.id, from?.uri?.user, to?.uri?.user, 'remote' === event.originator);
 

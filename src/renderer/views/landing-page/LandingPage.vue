@@ -28,15 +28,6 @@
           <button class="btu" @click="CheckUpdate('three')">
             {{ i18nt.buttons.checkUpdateInc }}
           </button>
-          <!-- <button class="btu" @click="CheckUpdate('four')">
-            {{ i18nt.buttons.ForcedUpdate }}
-          </button> -->
-          <button class="btu" @click="StartServer">
-            {{ i18nt.buttons.startServer }}
-          </button>
-          <button class="btu" @click="StopServer">
-            {{ i18nt.buttons.stopServer }}
-          </button>
           <button class="btu" @click="getMessage">
             {{ i18nt.buttons.viewMessage }}
           </button>
@@ -125,24 +116,6 @@ function getMessage() {
     // ElMessageBox.alert(res.data, "hint", {
     //   confirmButtonText: "Sure",
     // });
-  });
-}
-function StopServer() {
-  ipcRendererChannel.StopServer.invoke().then((res) => {
-    // ElMessage({
-    //   type: "success",
-    //   message: "Success",
-    // });
-  });
-}
-function StartServer() {
-  ipcRendererChannel.StartServer.invoke().then((res) => {
-    if (res) {
-      // ElMessage({
-      //   type: "success",
-      //   message: res,
-      // });
-    }
   });
 }
 

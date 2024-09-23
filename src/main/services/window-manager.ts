@@ -19,6 +19,7 @@ class MainInit {
   }
   createMainWindow() {
     this.mainWindow = new BrowserWindow({
+      title: 'ABCDEF',
       titleBarOverlay: {
         color: "#fff",
       },
@@ -44,6 +45,9 @@ class MainInit {
     this.mainWindow.loadURL(this.winURL).catch(console.error);
     this.mainWindow.once("ready-to-show", () => {
       this.mainWindow.show();
+
+
+      this.mainWindow['name'] = 'MAIN';
       if (config.UseStartupChart) this.loadWindow.destroy();
     });
 

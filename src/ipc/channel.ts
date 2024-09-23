@@ -29,19 +29,18 @@ export class IpcChannelMainClass {
   OpenMessagebox: IpcMainEventListener<Electron.MessageBoxOptions, Electron.MessageBoxReturnValue> = null;
   StartDownload: IpcMainEventListener<string> = null;
   OpenErrorbox: IpcMainEventListener<{ title: string; message: string }> = null;
-  StartServer: IpcMainEventListener<void, string> = null;
-  StopServer: IpcMainEventListener<void, string> = null;
   HotUpdate: IpcMainEventListener = null;
 
-
   OpenWin: IpcMainEventListener<{
-
     url: string;
     IsPay?: boolean;
     PayUrl?: string;
     sendData?: unknown;
   }> = null;
+
+  FocusMainWindow: IpcMainEventListener<string> = null;
 }
+
 export class IpcChannelRendererClass {
   // ipcRenderer
   DownloadProgress: IpcRendererEventListener<number> = null;

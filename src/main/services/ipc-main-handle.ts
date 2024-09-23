@@ -1,4 +1,4 @@
-import { dialog, BrowserWindow, app } from "electron";
+import { dialog, BrowserWindow, app, IpcMainInvokeEvent, MessageBoxReturnValue, MessageBoxOptions } from "electron";
 import { getPreloadFile, winURL } from "../config/static-path";
 import { updater } from "../services/hot-updater";
 import DownloadFile from "../services/download-file";
@@ -6,41 +6,26 @@ import Update from "../services/check-update";
 import config from "@config/index";
 import { IIpcMainHandle } from "../../ipc";
 import { webContentSend } from "./web-content-send";
+import MainInit from "./window-manager";
 
 export class IpcMainHandleClass implements IIpcMainHandle {
   private allUpdater: Update;
   constructor() {
     this.allUpdater = new Update();
   }
-  StartDownload: (
-    event: Electron.IpcMainInvokeEvent,
-    args: string
-  ) => void | Promise<void> = (event, downloadUrl) => {
-    new DownloadFile(
-      BrowserWindow.fromWebContents(event.sender),
-      downloadUrl
-    ).start();
-  };
-  StartServer: (
-    event: Electron.IpcMainInvokeEvent
-  ) => string | Promise<string> = async () => {
-    dialog.showErrorBox("error", "API is obsolete");
-    return "API is obsolete";
-  };
-  StopServer: (event: Electron.IpcMainInvokeEvent) => string | Promise<string> =
-    async () => {
-      dialog.showErrorBox("error", "API is obsolete");
-      return "API is obsolete";
-    };
-  HotUpdate: (event: Electron.IpcMainInvokeEvent) => void | Promise<void> = (
-    event
-  ) => {
+
+
+
+  StartDownload = (event: IpcMainInvokeEvent, downloadUrl: string): void | Promise<void> => {
+    new DownloadFile(BrowserWindow.fromWebContents(event.sender), downloadUrl).start();
+  }
+
+  HotUpdate = (event: IpcMainInvokeEvent) => {
     updater(BrowserWindow.fromWebContents(event.sender));
-  };
-  OpenWin: (
-    event: Electron.IpcMainInvokeEvent,
-    args: { url: string; IsPay?: boolean; PayUrl?: string; sendData?: unknown }
-  ) => void | Promise<void> = (event, arg) => {
+  }
+
+
+  OpenWin = (_: IpcMainInvokeEvent, arg: { url: string; IsPay?: boolean; PayUrl?: string; sendData?: unknown }) => {
     const childWin = new BrowserWindow({
       titleBarStyle: config.IsUseSysTitle ? "default" : "hidden",
       height: 595,
@@ -58,11 +43,14 @@ export class IpcMainHandleClass implements IIpcMainHandle {
         preload: getPreloadFile("preload"),
       },
     });
+
     if (process.env.NODE_ENV === "development") {
       childWin.webContents.openDevTools({ mode: "undocked", activate: true });
     }
+
     childWin.loadURL(winURL + `#${arg.url}`);
     childWin.once("ready-to-show", () => {
+
       childWin.show();
       if (arg.IsPay) {
         const testUrl = setInterval(() => {
@@ -71,41 +59,43 @@ export class IpcMainHandleClass implements IIpcMainHandle {
             childWin.close();
           }
         }, 1200);
+
         childWin.on("close", () => {
           clearInterval(testUrl);
         });
+
       }
+
     });
+
     childWin.once("show", () => {
       webContentSend.SendDataTest(childWin.webContents, arg.sendData);
     });
-  };
 
-  IsUseSysTitle: (
-    event: Electron.IpcMainInvokeEvent
-  ) => boolean | Promise<boolean> = async () => {
+  }
+
+
+  IsUseSysTitle = (event: IpcMainInvokeEvent): boolean | Promise<boolean> => {
     return config.IsUseSysTitle;
-  };
-  AppClose: (event: Electron.IpcMainInvokeEvent) => void | Promise<void> = (
-    event
-  ) => {
+  }
+
+
+  AppClose = (_: IpcMainInvokeEvent) => {
     app.quit();
-  };
-  CheckUpdate: (event: Electron.IpcMainInvokeEvent) => void | Promise<void> = (
-    event
-  ) => {
+  }
+
+
+  CheckUpdate = (event: IpcMainInvokeEvent) => {
     this.allUpdater.checkUpdate(BrowserWindow.fromWebContents(event.sender));
-  };
-  ConfirmUpdate: (event: Electron.IpcMainInvokeEvent) => void | Promise<void> =
-    () => {
-      this.allUpdater.quitAndInstall();
-    };
-  OpenMessagebox: (
-    event: Electron.IpcMainInvokeEvent,
-    args: Electron.MessageBoxOptions
-  ) =>
-    | Electron.MessageBoxReturnValue
-    | Promise<Electron.MessageBoxReturnValue> = async (event, arg) => {
+  }
+
+
+  ConfirmUpdate = (_: IpcMainInvokeEvent) => {
+    this.allUpdater.quitAndInstall();
+  }
+
+
+  OpenMessagebox = async (event: IpcMainInvokeEvent, arg: MessageBoxOptions): Promise<MessageBoxReturnValue> => {
     const res = await dialog.showMessageBox(
       BrowserWindow.fromWebContents(event.sender),
       {
@@ -116,12 +106,38 @@ export class IpcMainHandleClass implements IIpcMainHandle {
         noLink: arg.noLink || true,
       }
     );
+
     return res;
-  };
-  OpenErrorbox: (
-    event: Electron.IpcMainInvokeEvent,
-    arg: { title: string; message: string }
-  ) => void | Promise<void> = (event, arg) => {
+
+  }
+
+  OpenErrorbox = (_: IpcMainInvokeEvent, arg: { title: string; message: string }) => {
     dialog.showErrorBox(arg.title, arg.message);
-  };
+  }
+
+
+  FocusMainWindow = (_: IpcMainInvokeEvent, url: string) => {
+    let mainWindow = BrowserWindow.getAllWindows()?.find(w => 'MAIN' === w['name']);
+    if (!mainWindow) {
+
+      // TODO: if tray worked, show window to user view
+
+      // const init = new MainInit();
+      // init.createMainWindow();
+
+      // mainWindow = init.mainWindow;
+
+      // mainWindow.once("ready-to-show", () => {
+      //   mainWindow.show();
+      //   mainWindow.focus();
+      // });
+
+      return;
+    } else {
+      mainWindow.show();
+      mainWindow.focus();
+    }
+
+    // mainWindow.loadURL(winURL + `#${url}`);
+  }
 }
