@@ -2,12 +2,12 @@
   <div class="flex justify-center items-center h-screen bg-gray-100">
     <a-card
       class="w-full bg-white shadow-lg rounded-lg overflow-hidden h-screen flex flex-col justify-center items-center">
-      <div class="flex justify-center mt-4">
-        <a-avatar size={80} src="https://randomuser.me/api/portraits/men/75.jpg" />
-      </div>
+<!--      <div class="flex justify-center mt-4">-->
+<!--        <a-avatar size={80} src="https://randomuser.me/api/portraits/men/75.jpg" />-->
+<!--      </div>-->
       <div class="text-center mt-6">
         <p class="text-2xl">{{ call.to }}</p>
-        <p class="text-lg text-gray-500 mt-2">{{ call.from }}</p>
+        <p class="text-xl text-gray-500 mt-2">{{ user.currentDID?.length ? user.currentDID : call.from }}</p>
       </div>
       <!-- <div class="text-center mt-4">
         <p v-if="endTimer" class="text-xl text-gray-700 font-bold">{{ duration }}</p>
@@ -30,8 +30,10 @@ import { CallStatus, useCallStore } from '@renderer/store/modules/call/call';
 import { computed, ref } from 'vue';
 
 import { useWebRTCAgent } from '@renderer/store/modules/agent/webrtc-agent';
+import {useUserStore} from "@store/auth/user";
 
 const call = useCallStore();
+const user = useUserStore();
 const wrtcAgent = useWebRTCAgent();
 
 const terminateCall = () => {

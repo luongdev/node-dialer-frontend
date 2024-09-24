@@ -1,12 +1,12 @@
 <template>
   <div class="flex justify-center items-center h-screen bg-gray-100">
     <a-card class="w-full bg-white overflow-hidden h-screen flex flex-col justify-center items-center">
-      <div class="flex justify-center mt-4">
-        <a-avatar size={80} src="https://randomuser.me/api/portraits/men/75.jpg"/>
-      </div>
+      <!--      <div class="flex justify-center mt-4">-->
+      <!--        <a-avatar size={80} src="https://randomuser.me/api/portraits/men/75.jpg"/>-->
+      <!--      </div>-->
       <div class="text-center mt-6">
-        <p class="text-2xl ">{{ call.from }}</p>
-        <p class="text-lg text-gray-500 mt-2">{{ call.to }}</p>
+        <p class="text-2xl "> {{ call.to }} </p>
+        <p class="text-xl text-gray-500 mt-2">{{ user.currentDID?.length ? user.currentDID : call.from }}</p>
       </div>
 
       <div class="text-center mt-4">
@@ -72,19 +72,18 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, onMounted, onUnmounted, ref, watch} from "vue";
+import {computed, onMounted, watch} from "vue";
 import {useDuration} from "@renderer/utils/reusable/duration";
 import {useWebRTCAgent} from "@renderer/store/modules/agent/webrtc-agent";
 import {CallStatus, useCallStore} from "@renderer/store/modules/call/call";
+import {useUserStore} from "@store/auth/user";
 
 const {startTime} = defineProps({
   startTime: {type: Number, default: () => Date.now()},
 })
 
-
-const micStatus = ref('mute');
-
 const call = useCallStore();
+const user = useUserStore();
 
 const callStatusLabel = computed(() => {
   switch (call.status) {
