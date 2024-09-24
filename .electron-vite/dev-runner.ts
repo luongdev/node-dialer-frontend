@@ -153,7 +153,7 @@ function startPreload(): Promise<void> {
 
 function startElectron() {
     var args = [
-        "--inspect=5858",
+        // "--inspect=5858",
         join(__dirname, "../dist/electron/main/main.js"),
     ];
 
@@ -195,29 +195,7 @@ function electronLog(data: any, color: string) {
     }
 }
 
-function greeting() {
-    const cols = process.stdout.columns;
-    let text: string | boolean = "";
-
-    if (cols > 104) text = "electron-vite";
-    else if (cols > 76) text = "electron-|vite";
-    else text = false;
-
-    if (text) {
-        say(text, {
-            colors: ["yellow"],
-            font: "simple3d",
-            space: false,
-        });
-    } else console.log(chalk.yellow.bold("\n  electron-vite"));
-    console.log(
-        chalk.blue("getting ready...") + "\n"
-    );
-}
-
 async function init() {
-    greeting();
-
     try {
         await startRenderer();
         await startMain();

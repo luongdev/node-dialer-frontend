@@ -22,6 +22,7 @@
       "@main/*": ["src/main/*"]
     },
     "typeRoots": ["node_modules/@types"],
+    "types": ["vite/client"],
     "lib": ["es2018", "dom"]
   },
   "include": ["src/**/*", "customTypes/*"],

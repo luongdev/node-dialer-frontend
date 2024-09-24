@@ -32,6 +32,8 @@ interface WebrtcAgent {
     registered: Ref<boolean>;
     error: Ref<string>;
     session?: RTCSession;
+    mute: Ref<boolean>;
+    hold: Ref<boolean>;
 }
 
 let _ua: UA;
@@ -47,8 +49,10 @@ export const useWebRTCAgent = defineStore({
         const registering = ref(false);
         const registered = ref(false);
         const error = ref('');
+        const mute = ref(false);
+        const hold = ref(false);
 
-        return {connected, registered, connecting, registering, error};
+        return {connected, registered, connecting, registering, error, mute, hold};
     },
     actions: {
         start: function () {
@@ -113,6 +117,26 @@ export const useWebRTCAgent = defineStore({
                 mediaConstraints: {audio: true, video: false},
                 rtcAnswerConstraints: {offerToReceiveAudio: true, offerToReceiveVideo: false},
             })
+        },
+        toggleMute: async function() {
+            if (!this.session) return;
+
+            const { audio: audioMuted } = this.session.isMuted();
+            if (audioMuted) {
+                this.session.unmute({ audio: true });
+            } else {
+                this.session.mute({ audio: true });
+            }
+        },
+        toggleHold: async function() {
+            if (!this.session) return;
+
+            const { local: localHold } = this.session.isOnHold();
+            if (localHold) {
+                this.session.unhold();
+            } else {
+                this.session.hold();
+            }
         },
         terminate: function (code?: number, causes?: string) {
             this.session.terminate();
@@ -217,6 +241,26 @@ const onRTPSession = async (event: RTCSessionEvent) => {
     session.on('confirmed', onSessionConfirmed);
     session.on('failed', onSessionEnded);
     session.on('ended', onSessionEnded);
+
+    session.on('muted', (event: any) => {
+        console.debug('UA[onSessionMuted]: ', event);
+        wrtcAgent.mute = true;
+    });
+
+    session.on('unmuted', (event: any) => {
+        console.debug('UA[onSessionUnmuted]: ', event);
+        wrtcAgent.mute = false;
+    });
+
+    session.on('hold', (event: any) => {
+        console.debug('UA[onSessionHold]: ', event);
+        wrtcAgent.hold = true;
+    });
+
+    session.on('unhold', (event: any) => {
+        console.debug('UA[onSessionUnhold]: ', event);
+        wrtcAgent.hold = false;
+    });
 
 
     // Outbound call trigger connection

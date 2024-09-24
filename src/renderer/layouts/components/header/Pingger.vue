@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, onMounted, toRefs, defineProps, ref, onUnmounted, watch} from 'vue';
+import {computed, onMounted, toRefs, ref, onUnmounted, watch} from 'vue';
 
 const props = defineProps(['time', 'interval', 'url']);
 const { time, interval, url } = toRefs(props);

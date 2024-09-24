@@ -13,7 +13,7 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted, toRefs, watch, defineProps} from 'vue'
+import {onMounted, toRefs, watch} from 'vue'
 import {useRouter} from 'vue-router'
 import {useAudioStore} from "@store/agent/audio";
 import {useLoading} from "@store/loading";

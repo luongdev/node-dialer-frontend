@@ -52,34 +52,32 @@ class MainInit {
     });
 
 
-    // if (process.env.NODE_ENV === "development") {
-    //   this.mainWindow.webContents.openDevTools({
-    //     mode: "undocked",
-    //     activate: true,
-    //   });
-    // }
+    if (process.env.NODE_ENV === "development") {
+      this.mainWindow.webContents.openDevTools({
+        mode: "undocked",
+        activate: true,
+      });
+    }
 
 
     globalShortcut.register('Alt+CommandOrControl+L', () => {
       this.mainWindow.webContents.openDevTools({ mode: "undocked", activate: true });
     })
 
-    this.mainWindow.on('close', (event: Event) => {
-      const response = dialog.showMessageBoxSync(this.mainWindow, {
-        type: 'question',
-        buttons: ['Thoát', 'Không'],
-        title: 'Xác nhận thoát ứng dụng',
-        message: 'Bạn sẽ không còn nhận được cuộc gọi từ ứng dụng. Bạn vẫn muốn thoát?',
-        defaultId: 1,
+    if (process.env.NODE_ENV !== 'development') {
+      this.mainWindow.on('close', (event: Event) => {
+        const response = dialog.showMessageBoxSync(this.mainWindow, {
+          type: 'question',
+          buttons: ['Thoát', 'Không'],
+          title: 'Xác nhận thoát ứng dụng',
+          message: 'Bạn sẽ không còn nhận được cuộc gọi từ ứng dụng. Bạn vẫn muốn thoát?',
+          defaultId: 1,
 
+        });
+
+        if (response == 1) event.preventDefault();
       });
-
-      console.log(response);
-
-      if (response == 1) event.preventDefault();
-    })
-
-
+    }
 
     this.mainWindow.on("unresponsive", () => {
       dialog

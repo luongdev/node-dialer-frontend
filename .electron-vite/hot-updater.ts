@@ -70,7 +70,6 @@ const start = async () => {
         version: packageFile.version,
         description: packageFile.description,
         main: packageFile.main,
-        author: packageFile.author,
         dependencies: packageFile.dependencies
       });
       okayLog(chalk.cyan.bold(`Rewrite package file complete \n`))

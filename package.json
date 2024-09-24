@@ -4,7 +4,7 @@
   "main": "./dist/electron/main/main.js",
   "description": "Dialer for WebRTC",
   "scripts": {
-    "dev": "tsx .electron-vite/dev-runner.ts",
+    "dev": "TSX_DISABLE_CACHE=1 tsx --no-cache .electron-vite/dev-runner.ts",
     "build": "cross-env BUILD_TARGET=clean tsx .electron-vite/build.ts -m prod && electron-builder -c build.json",
     "build:win32": "cross-env BUILD_TARGET=clean tsx .electron-vite/build.ts  && electron-builder -c build.json --win  --ia32",
     "build:win64": "cross-env BUILD_TARGET=clean tsx .electron-vite/build.ts  && electron-builder -c build.json --win  --x64",
@@ -20,7 +20,7 @@
     "axios": "^1.7.7",
     "electron-log": "^5.2.0",
     "electron-updater": "^6.3.4",
-    "glob": "^10.3.12",
+    "glob": "^11.0.0",
     "semver": "^7.6.3"
   },
   "devDependencies": {
