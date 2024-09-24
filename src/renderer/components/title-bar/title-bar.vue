@@ -1,10 +1,10 @@
 <template>
   <div class="window-title" v-if="!IsUseSysTitle && isNotMac && !IsWeb">
     <div style="-webkit-app-region: drag" class="logo">
-      <img
-        src="@renderer/assets/icons/svg/electron-logo.svg"
-        class="icon-logo"
-       alt=""/>
+<!--      <img-->
+<!--        src="@renderer/assets/icons/svg/electron-logo.svg"-->
+<!--        class="icon-logo"-->
+<!--       alt=""/>-->
     </div>
     <div></div>
     <div style="-webkit-app-region: drag" class="title"></div>

@@ -31,12 +31,12 @@
     ]
   },
   "mac": {
-    "icon": "build/icons/icon.icns"
+    "icon": "assets/icon.icns"
   },
   "win": {
-    "icon": "build/icons/icon.ico"
+    "icon": "assets/icon.ico"
   },
   "linux": {
-    "icon": "build/icons"
+    "icon": "assets/icon.ico"
   }
 }
