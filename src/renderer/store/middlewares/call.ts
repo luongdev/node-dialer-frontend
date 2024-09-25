@@ -6,6 +6,7 @@ import router from '@renderer/router';
 
 const { ipcRendererChannel } = window;
 
+
 export const callStoreMiddleware: PiniaPlugin = ({ store }) => {
     if (store.$id !== 'call') return;
 
@@ -21,7 +22,7 @@ export const callStoreMiddleware: PiniaPlugin = ({ store }) => {
                 router?.push(routerUrl)?.catch(console.error);
 
                 if (store.inbound) {
-                    ipcRendererChannel.FocusMainWindow.invoke(routerUrl);
+                    ipcRendererChannel.FocusMainWindow.invoke(routerUrl).catch(console.error);
                 }
                 break;
             case CallStatus.S_ANSWERED:

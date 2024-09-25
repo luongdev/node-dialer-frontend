@@ -5,6 +5,10 @@ import vueJsx from "@vitejs/plugin-vue-jsx";
 import viteIkarosTools from "./plugin/vite-ikaros-tools";
 import {getConfig} from "./utils";
 
+import vueDevTools from 'vite-plugin-vue-devtools'
+const devtools = vueDevTools({ componentInspector: false, launchEditor: 'webstorm' });
+
+
 function resolve(dir: string) {
     return join(__dirname, "..", dir);
 }
@@ -29,30 +33,19 @@ export default defineConfig({
     },
     base: "./",
     build: {
-        outDir:
-            config && config.target
-                ? resolve("dist/web")
-                : resolve("dist/electron/renderer"),
+        outDir: config && config.target ? resolve("dist/web") : resolve("dist/electron/renderer"),
         emptyOutDir: true,
         target: "esnext",
         cssCodeSplit: true,
         rollupOptions: {
-            output: {
-                // manualChunks: function (id: string) {
-                //     if (id.includes("ant-design-vue")) {
-                //         const postfix = id.split("ant-design-vue/es/")[1];
-                //         console.log(postfix);
-                //
-                //         return postfix?.split("/")?.[0];
-                //     }
-                // },
+            input: {
+                app: join(root, "index.html"),
+                systray: join(root, "systray.html"),
             }
         }
     },
-    server: {},
+    server: {
+    },
+    optimizeDeps: {},
     plugins: [vueJsx(), vuePlugin(), viteIkarosTools()],
-    optimizeDeps:
-        {}
-    ,
-})
-;
+});

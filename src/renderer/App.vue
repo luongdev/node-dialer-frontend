@@ -19,6 +19,9 @@ const user = useUserStore();
 const audio = useAudioStore();
 const wrtcAgent = useWebRTCAgent()
 
+const { ipcRendererChannel } = window;
+
+
 onMounted(() => {
   if (user.validate()) {
     watch(() => wrtcAgent.registered, () => router.push('/'));

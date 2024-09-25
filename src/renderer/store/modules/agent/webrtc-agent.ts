@@ -25,6 +25,13 @@ import {useAudioStore} from '@store/agent/audio';
 import {CallStatus, useCallStore} from "@store/call/call";
 import {useUserStore} from '../auth/user';
 
+const { ipcRendererChannel } = window;
+
+ipcRendererChannel.BroadcastAgent.on((_, args: any) => {
+    console.log('BroadcastAgent: ', args);
+})
+
+
 interface WebrtcAgent {
     connecting: Ref<boolean>;
     connected: Ref<boolean>;

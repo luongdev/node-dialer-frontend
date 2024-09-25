@@ -39,6 +39,7 @@ export class IpcChannelMainClass {
   }> = null;
 
   FocusMainWindow: IpcMainEventListener<string> = null;
+  Broadcast: IpcMainEventListener<unknown> = null;
 }
 
 export class IpcChannelRendererClass {
@@ -81,4 +82,8 @@ export class IpcChannelRendererClass {
     status: string;
     message: string;
   }> = null;
+
+  BroadcastCall: IpcRendererEventListener<any> = null;
+  BroadcastAgent: IpcRendererEventListener<any> = null;
+  BroadcastAudio: IpcRendererEventListener<any> = null;
 }
