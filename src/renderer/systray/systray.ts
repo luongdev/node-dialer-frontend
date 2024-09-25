@@ -5,7 +5,9 @@ import {createRouter, createWebHashHistory} from "vue-router";
 import '../styles/index.css';
 
 import Systray from "./Systray.vue";
-import {sipMiddleware} from "@renderer/systray/store/middlewares/sip";
+
+import {sipMiddleware} from "./store/middlewares/sip";
+import {audioMiddleware} from "./store/middlewares/audio";
 
 const router = createRouter({
     history: createWebHashHistory(),
@@ -20,6 +22,7 @@ tray.use(router);
 
 const store = createPinia();
 store.use(sipMiddleware);
+store.use(audioMiddleware);
 
 tray.use(store);
 

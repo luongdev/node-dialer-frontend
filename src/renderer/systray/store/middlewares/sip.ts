@@ -1,6 +1,7 @@
 import {PiniaPlugin} from "pinia";
 import {ConnectedEvent, ConnectingEvent, DisconnectEvent, RegisteredEvent, UnRegisteredEvent} from 'jssip/lib/UA';
-import {useSIP} from "@renderer/systray/store/sip";
+import {useSIP} from "../sip";
+import {useAudio} from "../audio";
 
 const {ipcRendererChannel} = window;
 ipcRendererChannel.BroadcastAgent.on(async (_, data) => {
@@ -8,6 +9,9 @@ ipcRendererChannel.BroadcastAgent.on(async (_, data) => {
 
     const sip = useSIP();
     if ('StartConnect' === event) {
+        const audio = useAudio();
+        await audio.start();
+
         await sip.connect()
     }
 });
