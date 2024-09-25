@@ -1,4 +1,4 @@
-import {PiniaPlugin} from "pinia";
+import { PiniaPlugin } from "pinia";
 import {
     ConnectedEvent,
     ConnectingEvent,
@@ -7,8 +7,8 @@ import {
     RTCSessionEvent,
     UnRegisteredEvent
 } from 'jssip/lib/UA';
-import {useSIP} from "../sip";
-import {useAudio} from "../audio";
+import { useSIP } from "../sip";
+import { useAudio } from "../audio";
 import {
     ConnectingEvent as RTCConnectingEvent, EndEvent,
     IncomingAckEvent,
@@ -16,10 +16,10 @@ import {
     OutgoingEvent
 } from "jssip/lib/RTCSession";
 
-const {ipcRendererChannel} = window;
+const { ipcRendererChannel } = window;
 
 ipcRendererChannel.BroadcastAgent.on(async (_, data) => {
-    const {event} = data || {};
+    const { event } = data || {};
 
     const sip = useSIP();
     if ('StartConnect' === event) {
@@ -31,11 +31,14 @@ ipcRendererChannel.BroadcastAgent.on(async (_, data) => {
 });
 
 ipcRendererChannel.BroadcastCall.on(async (_, data) => {
-    const {event} = data || {};
+    const { event, payload } = data || {};
 
     const sip = useSIP();
     if ('Answer' === event) {
-       sip.session?.answer();
+        sip.session?.answer();
+    } else if ('Terminated' === event) {
+        const { code, cause } = payload || {};
+        sip.session?.terminate({ status_code: code, reason_phrase: cause });
     }
 });
 
@@ -45,7 +48,7 @@ const connectInject = async (store: any) => {
     store.ua.start();
 }
 
-export const sipMiddleware: PiniaPlugin = ({store}) => {
+export const sipMiddleware: PiniaPlugin = ({ store }) => {
     if (store.$id !== 'sip') return;
 
     store.$onAction(act => {
@@ -57,9 +60,9 @@ export const sipMiddleware: PiniaPlugin = ({store}) => {
     store.$subscribe(async (_, state) => {
         await ipcRendererChannel.Broadcast.invoke({
             type: 'Agent',
-            body: {event: 'StateUpdated', payload: {...state}},
+            body: { event: 'StateUpdated', payload: { ...state } },
         });
-    }, {detached: true})
+    }, { detached: true })
 }
 
 
@@ -118,8 +121,8 @@ const registrationFailedHandler = async (event: UnRegisteredEvent, store: any) =
 }
 
 const rtcSessionHandler = async (event: RTCSessionEvent, store: any) => {
-    const {request, session} = event || {};
-    const {from, to} = request || {};
+    const { request, session } = event || {};
+    const { from, to } = request || {};
     if (!from || !to || !session) {
         return;
     }
@@ -129,7 +132,7 @@ const rtcSessionHandler = async (event: RTCSessionEvent, store: any) => {
         type: 'Call',
         body: {
             event: 'Initialized',
-            payload: {from: from.uri.user, to: to.uri.user, id: session.id, inbound: event.originator !== 'local'},
+            payload: { from: from.uri.user, to: to.uri.user, id: session.id, inbound: event.originator !== 'local' },
         }
     });
 
@@ -214,6 +217,6 @@ const onSessionEnded = async (event: EndEvent) => {
 const _broadcastCallStatus = async (status: string) => {
     return await ipcRendererChannel.Broadcast.invoke({
         type: 'Call',
-        body: {event: 'StatusUpdated', payload: {status}},
+        body: { event: 'StatusUpdated', payload: { status } },
     });
 }

@@ -14,11 +14,11 @@
         </div>
         <div v-if="'RINGING' === call.status || 'NEW' === call.status" class="flex justify-around w-full px-6 mt-10">
           <a-button type="primary" size="large" class="bg-green-500 text-white text-xl py-3 mx-2 rounded-lg"
-            @click="answerCall">
+            @click="call.answer">
             Answer
           </a-button>
           <a-button danger type="primary" size="large" class="bg-red-500 text-white text-xl py-3 mx-2 rounded-lg"
-            @click="declineCall">
+            @click="call.reject">
             Decline
           </a-button>
         </div>
@@ -33,13 +33,5 @@ import EmptyLayout from "@layouts/EmptyLayout.vue";
 import {useCallStore} from "@store/call/call";
 
 const call = useCallStore();
-
-const answerCall = () => {
-  call.answer();
-}
-
-const declineCall = () => {
-  // wrtcAgent.terminate(486, 'Agent Rejected');
-}
 
 </script>
