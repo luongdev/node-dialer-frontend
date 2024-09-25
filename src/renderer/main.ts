@@ -13,12 +13,11 @@ import antd from 'ant-design-vue';
 import {errorHandler} from "./error";
 import "./utils/hackIpcRenderer";
 import {callStoreMiddleware} from "@renderer/store/middlewares/call";
-import {audioStoreMiddleware} from "@renderer/store/middlewares/audio";
 
 const app = createApp(App);
 const store = createPinia();
 
-store.use(callStoreMiddleware).use(audioStoreMiddleware);
+store.use(callStoreMiddleware);
 
 app.use(router);
 app.use(store);

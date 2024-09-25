@@ -12,7 +12,7 @@
         <div v-if="'REJECTED' === call.status" class="text-center mt-6">
           <p class="text-xl text-red-500">Cuộc gọi bị từ chối</p>
         </div>
-        <div v-if="'RINGING' === call.status" class="flex justify-around w-full px-6 mt-10">
+        <div v-if="'RINGING' === call.status || 'NEW' === call.status" class="flex justify-around w-full px-6 mt-10">
           <a-button type="primary" size="large" class="bg-green-500 text-white text-xl py-3 mx-2 rounded-lg"
             @click="answerCall">
             Answer
@@ -30,18 +30,16 @@
 <script setup lang="ts">
 
 import EmptyLayout from "@layouts/EmptyLayout.vue";
-import {CallStatus, useCallStore} from "@store/call/call";
-import { useWebRTCAgent } from "@renderer/store/modules/agent/webrtc-agent";
+import {useCallStore} from "@store/call/call";
 
 const call = useCallStore();
-const wrtcAgent = useWebRTCAgent();
 
 const answerCall = () => {
-  wrtcAgent.answer();
+  call.answer();
 }
 
 const declineCall = () => {
-  wrtcAgent.terminate(486, 'Agent Rejected');
+  // wrtcAgent.terminate(486, 'Agent Rejected');
 }
 
 </script>

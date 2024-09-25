@@ -1,5 +1,8 @@
 import {defineStore} from "pinia";
 
+const {ipcRendererChannel} = window;
+
+
 export enum CallStatus {
     S_NEW = 'NEW',
     S_CONNECTING = 'CONNECTING',
@@ -40,6 +43,12 @@ export const useCallStore = defineStore({
             this.to = to;
             this.startTime = Date.now();
             this.error = '';
+        },
+        answer: async function () {
+            await ipcRendererChannel.Broadcast.invoke({
+                type: 'Call',
+                body: {event: 'Answer'},
+            });
         }
     },
 });

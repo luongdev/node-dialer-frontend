@@ -1,17 +1,32 @@
-import { PiniaPlugin } from "pinia";
-import { watch } from "vue";
-import { CallStatus } from "@store/call/call";
+import {PiniaPlugin} from "pinia";
+import {watch} from "vue";
+import {CallStatus, useCallStore} from "@store/call/call";
 
 import router from '@renderer/router';
 
-const { ipcRendererChannel } = window;
+const {ipcRendererChannel} = window;
+ipcRendererChannel.BroadcastCall.on(async (_, data) => {
+    const {event, payload} = data || {};
+
+    const call = useCallStore();
+    if ('Initialized' === event) {
+        const {from, to, id, inbound} = payload || {};
+        call.init(id, from, to, inbound);
+
+    } else if ('StatusUpdated' === event) {
+        const {status} = payload || {};
+        if (status !== call.status) {
+            call.status = status;
+        }
+    }
+});
 
 
-export const callStoreMiddleware: PiniaPlugin = ({ store }) => {
+export const callStoreMiddleware: PiniaPlugin = ({store}) => {
     if (store.$id !== 'call') return;
 
     watch(() => store.status, (crntStatus, prevStatus) => {
-        console.log('Day la call status: ', { prev: prevStatus, status: crntStatus });
+        console.log('Day la call status: ', {prev: prevStatus, status: crntStatus});
 
 
         switch (crntStatus) {
