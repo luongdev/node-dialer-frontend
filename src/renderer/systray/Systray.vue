@@ -8,12 +8,4 @@
 </template>
 
 <script setup lang="ts">
-import {useSIP} from './store/sip';
-import {onMounted} from "vue";
-
-const sip = useSIP();
-
-onMounted(() => {
-  sip.connect();
-})
 </script>

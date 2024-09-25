@@ -1,7 +1,16 @@
 import {PiniaPlugin} from "pinia";
 import {ConnectedEvent, ConnectingEvent, DisconnectEvent, RegisteredEvent, UnRegisteredEvent} from 'jssip/lib/UA';
+import {useSIP} from "@renderer/systray/store/sip";
 
 const {ipcRendererChannel} = window;
+ipcRendererChannel.BroadcastAgent.on(async (_, data) => {
+    const {event} = data || {};
+
+    const sip = useSIP();
+    if ('StartConnect' === event) {
+        await sip.connect()
+    }
+});
 
 const connectInject = async (store: any) => {
     bindConnectionEvents(store);
@@ -17,6 +26,13 @@ export const sipMiddleware: PiniaPlugin = ({store}) => {
             act.after(async () => await connectInject(act.store))
         }
     }, true);
+
+    store.$subscribe(async (_, state) => {
+        await ipcRendererChannel.Broadcast.invoke({
+            type: 'Agent',
+            body: {event: 'StateUpdated', payload: {...state}},
+        });
+    }, {detached: true})
 }
 
 
@@ -33,14 +49,6 @@ const bindConnectionEvents = (store: any) => {
 
 const connectingHandler = async (_: ConnectingEvent, store: any) => {
     store.connecting = true;
-
-    await ipcRendererChannel.Broadcast.invoke({
-        type: 'Agent',
-        body: {
-            connected: store.connected,
-            connecting: store.connecting,
-        }
-    });
 }
 
 const connectedHandler = async (_: ConnectedEvent, store: any) => {
@@ -50,14 +58,6 @@ const connectedHandler = async (_: ConnectedEvent, store: any) => {
     if (store.autoRegister) {
         store.registering = true;
     }
-
-    await ipcRendererChannel.Broadcast.invoke({
-        type: 'Agent',
-        body: {
-            connected: store.connected,
-            connecting: store.connecting,
-        }
-    });
 }
 
 const disconnectedHandler = async (event: DisconnectEvent, store: any) => {
@@ -67,41 +67,16 @@ const disconnectedHandler = async (event: DisconnectEvent, store: any) => {
     if (event.error) {
         store.error = event.reason;
     }
-
-    await ipcRendererChannel.Broadcast.invoke({
-        type: 'Agent',
-        body: {
-            connected: store.connected,
-            connecting: store.connecting,
-            error: store.error,
-        }
-    });
 }
 
 const registeredHandler = async (_: RegisteredEvent, store: any) => {
     store.registering = false;
     store.registered = true;
-
-    await ipcRendererChannel.Broadcast.invoke({
-        type: 'Agent',
-        body: {
-            registering: store.registering,
-            registered: store.registered,
-        }
-    });
 }
 
 const unregisteredHandler = async (_: UnRegisteredEvent, store: any) => {
     store.registering = false;
     store.registered = false;
-
-    await ipcRendererChannel.Broadcast.invoke({
-        type: 'Agent',
-        body: {
-            registering: store.registering,
-            registered: store.registered,
-        }
-    });
 }
 
 const registrationFailedHandler = async (event: UnRegisteredEvent, store: any) => {
@@ -111,13 +86,4 @@ const registrationFailedHandler = async (event: UnRegisteredEvent, store: any) =
     if (event.cause) {
         store.error = event.cause;
     }
-
-    await ipcRendererChannel.Broadcast.invoke({
-        type: 'Agent',
-        body: {
-            registering: store.registering,
-            registered: store.registered,
-            error: store.error,
-        }
-    });
 }

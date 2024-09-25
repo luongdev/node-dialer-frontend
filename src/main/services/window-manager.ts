@@ -142,11 +142,7 @@ class MainInit {
             alwaysOnTop: true,
             webPreferences: {
                 sandbox: false,
-                experimentalFeatures: true,
                 backgroundThrottling: false,
-                spellcheck: false,
-                allowRunningInsecureContent: true,
-                disableDialogs: true,
                 devTools: true,
                 preload: getPreloadFile('preload'),
             },
@@ -200,7 +196,7 @@ class MainInit {
         tray.setContextMenu(contextMenu);
 
         // Khi click vào tray icon
-        tray.on('click', toggleWindow);
+        // tray.on('click', toggleWindow);
     }
 }
 

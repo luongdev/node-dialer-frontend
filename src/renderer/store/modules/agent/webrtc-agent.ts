@@ -29,6 +29,17 @@ const { ipcRendererChannel } = window;
 
 ipcRendererChannel.BroadcastAgent.on((_, args: any) => {
     console.log('BroadcastAgent: ', args);
+
+    const { event, payload } = args || {};
+    if ('StateUpdated' === event) {
+        const wrtcAgent = useWebRTCAgent();
+        Object.keys(payload).forEach(k => {
+            if (payload[k] === wrtcAgent[k]) return;
+
+            wrtcAgent[k] = payload[k];
+            console.log(`Updated ${k} to ${payload[k]}`);
+        });
+    }
 })
 
 

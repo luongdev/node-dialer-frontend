@@ -83,6 +83,8 @@ import router from '@renderer/router';
 import {notification} from "ant-design-vue";
 import {useLoading} from "@store/loading";
 
+const {ipcRendererChannel} = window;
+
 const loading = useLoading();
 
 const user = useUserStore();
@@ -129,10 +131,11 @@ const formState = reactive({
 // });
 
 onMounted(() => {
-  // user.extension = '10000';
-  // user.password = 'Abcd@54321';
+  user.extension = '10000';
+  user.password = 'Abcd@54321';
   user.domain = 'voiceuat.metechvn.com';
-  user.gateway = '103.229.40.170:7080';
+  // user.gateway = '103.229.40.170:7080';
+  user.gateway = '101.99.20.58:7080';
   user.iceServers = [];
   user.tls = false;
 
@@ -162,7 +165,7 @@ onMounted(() => {
 
 
 const loginFormRef = ref();
-const onFinish = () => {
+const onFinish = async () => {
   const {extension, password, domain, gateway, protocol, iceServers, iceEnabled} = formState;
 
   user.extension = extension;
@@ -179,6 +182,13 @@ const onFinish = () => {
   }
 
   wrtcAgent.start();
+  await ipcRendererChannel.Broadcast.invoke({
+    type: 'Agent',
+    body: {
+      event: 'StartConnect'
+    }
+  });
+
   loading.set(true);
 };
 

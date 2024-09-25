@@ -1,35 +1,30 @@
 <template>
-    <title-bar/>
-    <router-view v-slot="{ Component }">
-      <component :is="Component"/>
-    </router-view>
+  <title-bar/>
+  <router-view v-slot="{ Component }">
+    <component :is="Component"/>
+  </router-view>
 </template>
 
 <script setup lang="ts">
 import TitleBar from "@renderer/components/title-bar/title-bar.vue";
 import {onMounted, watch} from "vue";
 import {useUserStore} from "@store/auth/user";
-import {useWebRTCAgent} from "@store/agent/webrtc-agent";
 import {useRouter} from "vue-router";
-import {useAudioStore} from "@store/agent/audio";
 
 const router = useRouter();
-
 const user = useUserStore();
-const audio = useAudioStore();
-const wrtcAgent = useWebRTCAgent()
 
-const { ipcRendererChannel } = window;
+const {ipcRendererChannel} = window;
 
-
-onMounted(() => {
+onMounted(async () => {
   if (user.validate()) {
-    watch(() => wrtcAgent.registered, () => router.push('/'));
-    wrtcAgent.start();
+    await ipcRendererChannel.Broadcast.invoke({
+      type: 'Agent',
+      body: {event: 'StartConnect'}
+    })
   } else {
-    router.push('/signin');
+    await router.push('/signin');
   }
-  audio.start();
 });
 
 </script>

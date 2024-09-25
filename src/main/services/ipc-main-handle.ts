@@ -143,6 +143,7 @@ export class IpcMainHandleClass implements IIpcMainHandle {
   Broadcast = (event: IpcMainInvokeEvent, { type, body }) => {
     webContents.getAllWebContents().forEach(wc => {
       if (wc.id === event.sender.id) return;
+      debugger
       const trigger = webContentSend[`Broadcast${type}`];
         if (trigger) {
           trigger(wc, body);
