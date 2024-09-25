@@ -141,13 +141,14 @@ class MainInit {
       },
     });
 
-    win.loadURL(this.winURL).catch(console.error);
+    console.log(this.winURL);
+
+    win.loadURL(`${this.winURL}/systray`).catch(console.error);
 
     function showWindow() {
-      const trayBounds = tray.getBounds(); // Lấy vị trí của tray icon
-      const windowBounds = win.getBounds(); // Lấy kích thước cửa sổ
+      const trayBounds = tray.getBounds();
+      const windowBounds = win.getBounds();
 
-      // Đặt vị trí cửa sổ dưới tray icon
       const x = Math.round(trayBounds.x + trayBounds.width / 2 - windowBounds.width / 2);
       const y = Math.round(trayBounds.y + trayBounds.height);
 
