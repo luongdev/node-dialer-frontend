@@ -6,7 +6,12 @@
       <!--      </div>-->
       <div class="text-center mt-6">
         <p class="text-2xl "> {{ call.to }} </p>
-        <p class="text-xl text-gray-500 mt-2">{{ user.currentDID?.length ? user.currentDID : call.from }}</p>
+        <p v-if="!call.inbound" class="text-xl text-gray-500 mt-2">
+          {{ user.currentDID?.length ? user.currentDID : call.from }}
+        </p>
+        <p v-else class="text-xl text-gray-500 mt-2">
+          {{ call.from }}
+        </p>
       </div>
 
       <div class="text-center mt-4">
@@ -84,6 +89,14 @@ const {startTime} = defineProps({
 
 const call = useCallStore();
 const user = useUserStore();
+
+const fromNum = computed(() => {
+
+});
+
+const toNum = computed(() => {
+
+});
 
 const callStatusLabel = computed(() => {
   switch (call.status) {

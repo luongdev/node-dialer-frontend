@@ -1,5 +1,5 @@
 import config from "@config/index";
-import { BrowserWindow, dialog, globalShortcut } from "electron";
+import {BrowserWindow, dialog, globalShortcut, Menu, Tray, nativeTheme} from "electron";
 import { winURL, loadingURL, getPreloadFile } from "../config/static-path";
 import { useProcessException } from "@main/hooks/exception-hook";
 
@@ -9,7 +9,7 @@ class MainInit {
   public shartURL: string = "";
   public loadWindow: BrowserWindow = null;
   public mainWindow: BrowserWindow = null;
-  private childProcessGone = null;
+  private readonly childProcessGone = null;
 
   constructor() {
     const { childProcessGone } = useProcessException();
@@ -19,7 +19,6 @@ class MainInit {
   }
   createMainWindow() {
     this.mainWindow = new BrowserWindow({
-      title: 'ABCDEF',
       titleBarOverlay: {
         color: "#fff",
       },
@@ -128,6 +127,65 @@ class MainInit {
     } else {
       return this.createMainWindow();
     }
+  }
+
+  trayWindow = () => {
+
+    const win = new BrowserWindow({
+      width: 400,
+      height: 300,
+      show: false,
+      frame: false,
+      webPreferences: {
+        nodeIntegration: true,
+      },
+    });
+
+    win.loadURL(this.winURL).catch(console.error);
+
+    function showWindow() {
+      const trayBounds = tray.getBounds(); // Lấy vị trí của tray icon
+      const windowBounds = win.getBounds(); // Lấy kích thước cửa sổ
+
+      // Đặt vị trí cửa sổ dưới tray icon
+      const x = Math.round(trayBounds.x + trayBounds.width / 2 - windowBounds.width / 2);
+      const y = Math.round(trayBounds.y + trayBounds.height);
+
+      win.setPosition(x, y, false);
+      win.show();
+      win.focus();
+    }
+
+    function toggleWindow() {
+      if (win.isVisible()) {
+        win.hide();
+      } else {
+        showWindow();
+      }
+    }
+
+
+    const contextMenu = Menu.buildFromTemplate([
+      {
+        label: 'Show/Hide Window',
+        click: toggleWindow, // Hàm toggle để hiển thị hoặc ẩn cửa sổ
+      },
+      {
+        label: 'Quit',
+        click: () => {
+          // app.quit(); // Thoát ứng dụng khi chọn Quit
+        },
+      },
+    ]);
+
+    const tray = new Tray('./assets/tray.png');
+
+    // Gắn menu vào tray icon
+    tray.setToolTip('Your Application');
+    tray.setContextMenu(contextMenu);
+
+    // Khi click vào tray icon
+    tray.on('click', toggleWindow);
   }
 }
 export default MainInit;

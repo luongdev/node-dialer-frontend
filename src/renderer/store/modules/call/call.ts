@@ -5,6 +5,7 @@ export enum CallStatus {
     S_CONNECTING = 'CONNECTING',
     S_RINGING = 'RINGING',
     S_ANSWERED = 'ANSWERED',
+    S_REJECTED = 'REJECTED',
     S_TERMINATED = 'TERMINATED',
     S_ERROR = 'ERROR',
 }

@@ -139,7 +139,7 @@ export const useWebRTCAgent = defineStore({
             }
         },
         terminate: function (code?: number, causes?: string) {
-            this.session.terminate();
+            this.session.terminate({ status_code: code, reason_phrase: causes });
         },
         stop: function () {
             if (_ua && _ua.isConnected()) {
@@ -316,7 +316,9 @@ const onSessionEnded = (event: EndEvent) => {
     console.debug(`UA[onSessionEnded] ${event.cause}: `, event);
     const call = useCallStore();
 
-    if ('Terminated' !== event.cause) {
+    if ('Rejected' === event.cause) {
+        call.status = CallStatus.S_REJECTED;
+    } else if ('Terminated' !== event.cause) {
         call.error = event.cause;
         call.status = CallStatus.S_ERROR;
     } else {
