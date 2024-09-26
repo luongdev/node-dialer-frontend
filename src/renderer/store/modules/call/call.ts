@@ -1,7 +1,7 @@
 import { causes } from "jssip/lib/Constants";
-import {defineStore} from "pinia";
+import { defineStore } from "pinia";
 
-const {ipcRendererChannel} = window;
+const { ipcRendererChannel } = window;
 
 
 export enum CallStatus {
@@ -24,12 +24,15 @@ export interface CallState {
     answerTime?: number;
     error?: string;
     timer?: NodeJS.Timeout;
+
+    mute: boolean;
+    hold: boolean;
 }
 
 export const useCallStore = defineStore({
     id: 'call',
     state: (): CallState => {
-        return {id: '', status: '', error: ''};
+        return { id: '', status: '', error: '', mute: false, hold: false };
     },
     actions: {
         init: function (id: string, from: string, to: string, inbound: boolean) {
@@ -48,31 +51,31 @@ export const useCallStore = defineStore({
         answer: async function () {
             await ipcRendererChannel.Broadcast.invoke({
                 type: 'Call',
-                body: {event: 'Answer'},
+                body: { event: 'Answer' },
             });
         },
-        reject: async function() {
+        reject: async function () {
             await ipcRendererChannel.Broadcast.invoke({
                 type: 'Call',
-                body: {event: 'Terminated', payload: { code: 486, cause: causes.REJECTED }},
+                body: { event: 'Terminated', payload: { code: 486, cause: causes.REJECTED } },
             });
         },
-        terminate: async function() {
+        terminate: async function () {
             await ipcRendererChannel.Broadcast.invoke({
                 type: 'Call',
-                body: {event: 'Terminated', payload: { code: 200, cause: causes.BYE }},
+                body: { event: 'Terminated', payload: { code: 200, cause: causes.BYE } },
             });
         },
-        toggleHold: async function() {
+        toggleHold: async function () {
             await ipcRendererChannel.Broadcast.invoke({
                 type: 'Call',
-                body: {event: 'ToggleHold'},
+                body: { event: 'ToggleHold' },
             });
         },
-        toggleMute: async function() {
+        toggleMute: async function () {
             await ipcRendererChannel.Broadcast.invoke({
                 type: 'Call',
-                body: {event: 'ToggleMute'},
+                body: { event: 'ToggleMute' },
             });
         }
     },

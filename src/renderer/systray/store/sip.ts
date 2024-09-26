@@ -1,12 +1,12 @@
-import {defineStore} from 'pinia';
-import {UA, URI, WebSocketInterface} from 'jssip';
+import { defineStore } from 'pinia';
+import { UA, URI, WebSocketInterface } from 'jssip';
 import {
     RTCSession
 } from 'jssip/lib/RTCSession';
 
-import {useAudio} from './audio';
+import { useAudio } from './audio';
 
-import {useUserStore} from '@store/auth/user';
+import { useUserStore } from '@store/auth/user';
 
 interface SIP {
     connecting: boolean;
@@ -38,7 +38,7 @@ export const useSIP = defineStore({
         };
     },
     actions: {
-        async connect() {
+        connect: async function () {
             if (this.connecting || this.connected) {
                 return;
             }
@@ -57,7 +57,7 @@ export const useSIP = defineStore({
 
             const proto = !user.tls ? 'ws' : 'wss';
             const sockets = [new WebSocketInterface(`${proto}://${user.gateway}`)];
-            const contact = new URI('sip', user.extension, user.domain, null, {transport: 'ws'}).toString();
+            const contact = new URI('sip', user.extension, user.domain, null, { transport: 'ws' }).toString();
 
             this.ua = new UA({
                 sockets,
@@ -68,6 +68,28 @@ export const useSIP = defineStore({
                 register: this.autoRegister,
             });
         },
+
+        toggleMute: async function () {
+            if (!this.session) return;
+
+            const { audio: audioMuted } = this.session.isMuted();
+            if (audioMuted) {
+                this.session.unmute({ audio: true });
+            } else {
+                this.session.mute({ audio: true });
+            }
+        },
+        toggleHold: async function () {
+            if (!this.session) return;
+
+            const { local: localHold } = this.session.isOnHold();
+            if (localHold) {
+                this.session.unhold();
+            } else {
+                this.session.hold();
+            }
+        },
+
     }
 });
 

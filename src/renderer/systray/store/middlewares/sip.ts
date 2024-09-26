@@ -41,6 +41,10 @@ ipcRendererChannel.BroadcastCall.on(async (_, data) => {
     } else if ('Terminated' === event) {
         const { code, cause } = payload || {};
         sip.session?.terminate({ status_code: code, reason_phrase: cause });
+    } else if ('ToggleHold' === event) {
+        await sip.toggleHold();
+    } else if ('ToggleMute' === event) {
+        await sip.toggleMute();
     }
 });
 
@@ -214,7 +218,7 @@ const onSessionEnded = async (event: EndEvent, store: any) => {
     } else {
         await _broadcastCallStatus('TERMINATED');
     }
-    
+
     store.session.removeAllListeners();
     store.session = null;
 }
