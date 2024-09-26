@@ -6,8 +6,8 @@
 <!--          <a-avatar size={480} src="https://randomuser.me/api/portraits/men/75.jpg" />-->
 <!--        </div>-->
         <div class="text-center mt-6">
-          <p class="text-2xl ">{{ call.from }}</p>
-          <p class="text-xl text-gray-500 mt-2">{{ call.to }}</p>
+          <p class="text-2xl ">{{ call.current?.from }}</p>
+          <p class="text-xl text-gray-500 mt-2">{{ call.current?.to }}</p>
         </div>
         <div v-if="'REJECTED' === call.status" class="text-center mt-6">
           <p class="text-xl text-red-500">Cuộc gọi bị từ chối</p>
@@ -30,8 +30,8 @@
 <script setup lang="ts">
 
 import EmptyLayout from "@layouts/EmptyLayout.vue";
-import {useCallStore} from "@store/call/call";
+import { useCall } from "@store/call/call";
 
-const call = useCallStore();
+const call = useCall();
 
 </script>

@@ -1,6 +1,6 @@
 import {PiniaPlugin} from "pinia";
 import {watch} from "vue";
-import {CallStatus, useCallStore} from "@store/call/call";
+import {CallStatus, useCall} from "@store/call/call";
 
 import router from '@renderer/router';
 
@@ -8,7 +8,7 @@ const {ipcRendererChannel} = window;
 ipcRendererChannel.BroadcastCall.on(async (_, data) => {
     const {event, payload} = data || {};
 
-    const call = useCallStore();
+    const call = useCall();
     if ('Initialized' === event) {
         const {from, to, id, inbound} = payload || {};
         call.init(id, from, to, inbound);

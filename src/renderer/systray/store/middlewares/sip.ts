@@ -19,6 +19,8 @@ import {
     OutgoingEvent
 } from "jssip/lib/RTCSession";
 
+import { CallStatus, useCall } from '@store/call/call';
+
 const { ipcRendererChannel } = window;
 
 ipcRendererChannel.BroadcastAgent.on(async (_, data) => {
@@ -29,7 +31,7 @@ ipcRendererChannel.BroadcastAgent.on(async (_, data) => {
         const audio = useAudio();
         await audio.start();
 
-        await sip.connect()
+        await sip.connect();
     }
 });
 
@@ -41,10 +43,10 @@ ipcRendererChannel.BroadcastCall.on(async (_, data) => {
         const { number, headers } = payload || {};
         sip.call(number, headers);
     } else if ('Answer' === event) {
-        sip.session?.answer();
+        sip.answer();
     } else if ('Terminated' === event) {
         const { code, cause } = payload || {};
-        sip.session?.terminate({ status_code: code, reason_phrase: cause });
+        sip.terminate(code, cause);
     } else if ('ToggleHold' === event) {
         await sip.toggleHold();
     } else if ('ToggleMute' === event) {
@@ -66,9 +68,7 @@ export const sipMiddleware: PiniaPlugin = ({ store }) => {
             act.after(async (ua: UA) => await connectInject(ua, act.store));
         } else if (act.name === 'call') {
             act.after(async (session) => {
-                if (!session) {
-                    await _broadcastCallStatus('ERROR');
-                }
+                if (!session) { useCall().status = CallStatus.S_ERROR; }
             });
         }
     }, true);
@@ -143,15 +143,16 @@ const rtcSessionHandler = async (event: RTCSessionEvent, store: any) => {
         return;
     }
 
-    store.session = session;
-    await ipcRendererChannel.Broadcast.invoke({
-        type: 'Call',
-        body: {
-            event: 'Initialized',
-            payload: { from: from.uri.user, to: to.uri.user, id: session.id, inbound: event.originator !== 'local' },
-        }
+    const call = useCall();
+    call.init({
+        id: session.id,
+        to: to.uri.user,
+        from: from.uri.user,
+        startTime: Date.now(),
+        inbound: event.originator === 'remote',
     });
 
+    store.session = session;
 
     session.on('accepted', (event: any) => onSessionAccepted(event, store));
     session.on('confirmed', onSessionConfirmed);
@@ -200,12 +201,17 @@ const rtcSessionHandler = async (event: RTCSessionEvent, store: any) => {
 
 const onSessionConnecting = async (event: RTCConnectingEvent) => {
     console.debug('UA[onSessionConnecting]: ', event);
-    await _broadcastCallStatus('CONNECTING');
+
+    const call = useCall();
+    call.status = CallStatus.S_CONNECTING;
 }
 
 const onSessionAccepted = async (event: (IncomingEvent | OutgoingEvent), store: any) => {
     console.debug('UA[onSessionAccepted]: ', event);
-    await _broadcastCallStatus('ANSWERED');
+
+    const call = useCall();
+    call.status = CallStatus.S_ANSWERED;
+
     const audio = useAudio();
     if (!audio.remote) {
         audio.remote = new MediaStream();
@@ -219,22 +225,27 @@ const onSessionAccepted = async (event: (IncomingEvent | OutgoingEvent), store: 
 
 const onSessionProgress = async (event: IncomingEvent | OutgoingEvent) => {
     console.debug('UA[onSessionProgress]: ', event);
-    await _broadcastCallStatus('RINGING');
+
+    const call = useCall();
+    call.status = CallStatus.S_RINGING;
 }
 
 const onSessionConfirmed = async (event: IncomingAckEvent | OutgoingAckEvent) => {
     console.debug('UA[onSessionConfirmed]: ', event);
-    await _broadcastCallStatus('ANSWERED');
+
+    const call = useCall();
+    call.status = CallStatus.S_ANSWERED;
 }
 
 const onSessionEnded = async (event: EndEvent, store: any) => {
     console.debug('UA[onSessionEnded]: ', event);
+    const call = useCall();
     if ('Rejected' === event.cause) {
-        await _broadcastCallStatus('REJECTED');
+        call.status = CallStatus.S_REJECTED;
     } else if ('Terminated' !== event.cause) {
-        await _broadcastCallStatus('ERROR');
+        call.status = CallStatus.S_ERROR;
     } else {
-        await _broadcastCallStatus('TERMINATED');
+        call.status = CallStatus.S_TERMINATED;
     }
 
     store.session.removeAllListeners();

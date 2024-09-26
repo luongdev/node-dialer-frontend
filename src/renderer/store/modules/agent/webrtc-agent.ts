@@ -22,7 +22,7 @@ import {
 } from 'jssip/lib/UA';
 
 import {useAudioStore} from '@store/agent/audio';
-import {CallStatus, useCallStore} from "@store/call/call";
+import {CallStatus, useCall} from "@store/call/call";
 import {useUserStore} from '../auth/user';
 
 const { ipcRendererChannel } = window;
@@ -209,7 +209,7 @@ const onRTPSession = async (event: RTCSessionEvent) => {
         return;
     }
 
-    const call = useCallStore();
+    const call = useCall();
     const wrtcAgent = useWebRTCAgent();
 
     if (call.timer !== null && call.timer !== undefined) clearTimeout(call.timer);
@@ -258,12 +258,12 @@ const onRTPSession = async (event: RTCSessionEvent) => {
 
 const onSessionConnecting = (event: RTCConnectingEvent) => {
     console.log('UA[onSessionConnecting] ', event.request)
-    const call = useCallStore();
+    const call = useCall();
     call.status = CallStatus.S_CONNECTING;
 }
 
 const onSessionAccepted = async (event: (IncomingEvent | OutgoingEvent)) => {
-    const call = useCallStore();
+    const call = useCall();
     const audio = useAudioStore();
     const wrtcAgent = useWebRTCAgent();
 
@@ -280,13 +280,13 @@ const onSessionAccepted = async (event: (IncomingEvent | OutgoingEvent)) => {
 
 const onSessionProgress = (event: IncomingEvent | OutgoingEvent) => {
     console.debug('UA[onSessionProgress]: ', event);
-    const call = useCallStore();
+    const call = useCall();
     call.status = CallStatus.S_RINGING;
 }
 
 const onSessionConfirmed = (event: IncomingAckEvent | OutgoingAckEvent) => {
     console.debug('UA[onSessionConfirmed]: ', event);
-    const call = useCallStore();
+    const call = useCall();
 
     if (CallStatus.S_ANSWERED !== call.status) {
         call.status = CallStatus.S_ANSWERED;
@@ -296,7 +296,7 @@ const onSessionConfirmed = (event: IncomingAckEvent | OutgoingAckEvent) => {
 
 const onSessionEnded = (event: EndEvent) => {
     console.debug(`UA[onSessionEnded] ${event.cause}: `, event);
-    const call = useCallStore();
+    const call = useCall();
 
     if ('Rejected' === event.cause) {
         call.status = CallStatus.S_REJECTED;

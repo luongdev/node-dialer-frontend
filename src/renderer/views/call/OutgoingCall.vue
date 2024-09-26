@@ -6,8 +6,8 @@
 <!--        <a-avatar size={80} src="https://randomuser.me/api/portraits/men/75.jpg" />-->
 <!--      </div>-->
       <div class="text-center mt-6">
-        <p class="text-2xl">{{ call.to }}</p>
-        <p class="text-xl text-gray-500 mt-2">{{ user.currentDID?.length ? user.currentDID : call.from }}</p>
+        <p class="text-2xl">{{ call.current?.to }}</p>
+        <p class="text-xl text-gray-500 mt-2">{{ user.currentDID?.length ? user.currentDID : call.current?.from }}</p>
       </div>
       <!-- <div class="text-center mt-4">
         <p v-if="endTimer" class="text-xl text-gray-700 font-bold">{{ duration }}</p>
@@ -26,12 +26,12 @@
 </template>
 
 <script lang="ts" setup>
-import { CallStatus, useCallStore } from '@renderer/store/modules/call/call';
+import { CallStatus, useCall } from '@renderer/store/modules/call/call';
 import { computed } from 'vue';
 
-import {useUserStore} from "@store/auth/user";
+import { useUserStore } from "@store/auth/user";
 
-const call = useCallStore();
+const call = useCall();
 const user = useUserStore();
 
 const terminateCall = () => {

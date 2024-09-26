@@ -7,8 +7,9 @@ import { Tooltip } from 'ant-design-vue';
 
 import Systray from "./Systray.vue";
 
-import { sipMiddleware } from "./store/middlewares/sip";
-import { audioMiddleware } from "./store/middlewares/audio";
+import { sipMiddleware } from './store/middlewares/sip';
+import { audioMiddleware } from './store/middlewares/audio';
+import { reset } from '@renderer/store/middlewares';
 
 const router = createRouter({
     history: createWebHashHistory(),
@@ -22,6 +23,7 @@ const tray = createApp(Systray);
 tray.use(router);
 
 const store = createPinia();
+store.use(reset);
 store.use(sipMiddleware);
 store.use(audioMiddleware);
 

@@ -1,10 +1,10 @@
-import { causes } from "jssip/lib/Constants";
-import { RemovableRef, Serializer, useStorage } from '@vueuse/core';
+import { causes } from 'jssip/lib/Constants';
+import { RemovableRef, useStorage } from '@vueuse/core';
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { ResetFn, useLocal } from '@store/types';
+import { computed } from 'vue';
 
 const { ipcRendererChannel } = window;
-
 
 export enum CallStatus {
     S_NEW = 'NEW',
@@ -15,64 +15,71 @@ export enum CallStatus {
     S_TERMINATED = 'TERMINATED',
     S_ERROR = 'ERROR',
 }
-causes
+
+export interface CallInfo {
+    id?: string;
+    to?: string;
+    from?: string;
+    startTime?: number;
+    inbound?: boolean;
+}
 export interface CallState {
-    id: RemovableRef<string>;
-    status: RemovableRef<string>;
-    inbound: RemovableRef<boolean>;
-    from: RemovableRef<string>;
-    to: RemovableRef<string>;
-    startTime: RemovableRef<number>;
+    current: RemovableRef<CallInfo>;
+    status: RemovableRef<CallStatus>;
     answerTime: RemovableRef<number>;
     error: RemovableRef<string>;
-    timer?: NodeJS.Timeout;
 
     mute: RemovableRef<boolean>;
     hold: RemovableRef<boolean>;
+
+    timer?: NodeJS.Timeout;
 }
 
-const JSONSerializer: Serializer<any> = {
-    read: (raw: string) => {
-        if (!raw) return undefined;
+export const useLabel = () => {
+    const call = useCall();
 
-        return JSON.parse(raw);
-    },
-    write: (value: any) => {
-        if (!value) return undefined;
-
-        return JSON.stringify(value);
-    }
+    return computed(() => {
+        switch (call.status) {
+            case CallStatus.S_NEW:
+            case CallStatus.S_CONNECTING:
+                return 'Đang kết nối';
+            case CallStatus.S_RINGING:
+                return 'Đang đổ chuông';
+            case CallStatus.S_ANSWERED:
+                return 'Đã kết nối';
+            case CallStatus.S_REJECTED:
+                return 'Từ chối cuộc gọi';
+            case CallStatus.S_TERMINATED:
+                return 'Đã kết thúc';
+            case CallStatus.S_ERROR:
+                return 'Lỗi kết nối';
+            default:
+                return 'Không xác định';
+        }
+    });
 }
 
-export const useCallStore = defineStore({
+export const useCall = defineStore({
     id: 'call',
     state: (): CallState => {
-        const id = useStorage('call_id', ref(''));
-        const status = useStorage('call_status', ref(''));
-        const inbound = useStorage('call_inbound', null, localStorage, { serializer: JSONSerializer });
-        const from = useStorage('call_from', ref(''));
-        const to = useStorage('call_to', ref(''));
-        const startTime = useStorage('call_startTime', ref(0));
-        const answerTime = useStorage('call_answerTime', ref(0));
-        const error = useStorage('call_error', ref(''));
-        const mute = useStorage('call_mute', ref(false));
-        const hold = useStorage('call_hold', ref(false));
+        const current = useLocal<CallInfo>('call_current');
+        const status = useLocal<CallStatus>('call_status');
+        const answerTime = useLocal<number>('call_answerTime', 0);
+        const error = useLocal<string>('call_error');
+        const mute = useLocal<boolean>('call_mute', false);
+        const hold = useLocal<boolean>('call_hold', false);
 
-        return { id, status, inbound, from, to, startTime, answerTime, error, mute, hold };
+        return { current, status, answerTime, error, mute, hold };
     },
     actions: {
-        init: function (id: string, from: string, to: string, inbound: boolean) {
-            if (this.id.length) {
+        init: function (call: CallInfo) {
+            if (this.current) {
+                console.log('Call already exists: ', this.current);
                 return;
             }
 
-            this.id = id;
-            this.status = CallStatus.S_NEW;
-            this.inbound = inbound;
-            this.from = from;
-            this.to = to;
-            this.startTime = Date.now();
-            this.error = '';
+            this[ResetFn]();
+            this.current = call;
         },
 
         make: async function (number: string, headers: { [k: string]: string } = {}) {
@@ -117,9 +124,15 @@ export const useCallStore = defineStore({
             });
         },
 
-    },
-});
+        [ResetFn]: function (store?: any) {
+            if (!store) return;
 
-window.addEventListener('storage', (event: StorageEvent) => {
-    console.log('storage event', event);
+            store.current = null;
+            store.status = null;
+            store.error = null;
+            store.answerTime = 0;
+            store.mute = false;
+            store.hold = false;
+        },
+    },
 });

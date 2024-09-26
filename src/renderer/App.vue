@@ -7,7 +7,7 @@
 
 <script setup lang="ts">
 import TitleBar from "@renderer/components/title-bar/title-bar.vue";
-import {onMounted, watch} from "vue";
+import {onMounted} from "vue";
 import {useUserStore} from "@store/auth/user";
 import {useRouter} from "vue-router";
 

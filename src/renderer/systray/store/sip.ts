@@ -39,9 +39,9 @@ export const useSIP = defineStore({
     },
     actions: {
         connect: async function () {
-            if (this.connecting || this.connected) {
-                return;
-            }
+            if (this.connecting) return;
+
+            if (this.connected) return _ua;
 
             const audio = useAudio();
             const user = useUserStore();
@@ -75,7 +75,7 @@ export const useSIP = defineStore({
             if (!number || !_ua) return;
 
             const user = useUserStore();
-            const {local} = await useAudio().start();
+            const { local } = await useAudio().start();
 
             let target = number;
             if (!number.startsWith('sip:')) {
@@ -94,10 +94,25 @@ export const useSIP = defineStore({
                 extraHeaders,
                 mediaStream: local,
                 sessionTimersExpires: 120,
-                rtcOfferConstraints: {offerToReceiveAudio: true, offerToReceiveVideo: false}
+                rtcOfferConstraints: { offerToReceiveAudio: true, offerToReceiveVideo: false }
             });
 
             return session;
+        },
+
+        answer: async function () {
+            if (!this.session) return;
+
+            this.session.answer({
+                pcConfig: { iceServers: [] },
+                rtcAnswerConstraints: { offerToReceiveAudio: true, offerToReceiveVideo: false },
+            });
+        },
+
+        terminate: async function (code?: number, cause?: string) {
+            if (!this.session) return;
+
+            this.session.terminate({ status_code: code ?? 200, reason_phrase: cause ?? 'NORMAL_CLEARING' });
         },
 
         toggleMute: async function () {
@@ -124,4 +139,3 @@ export const useSIP = defineStore({
 
     }
 });
-

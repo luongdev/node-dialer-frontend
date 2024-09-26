@@ -1,5 +1,5 @@
 import config from "@config/index";
-import { BrowserWindow, dialog, globalShortcut, Menu, Tray, nativeTheme } from "electron";
+import { BrowserWindow, dialog, globalShortcut, Menu, Tray, app } from "electron";
 import { winURL, loadingURL, getPreloadFile } from "../config/static-path";
 import { useProcessException } from "@main/hooks/exception-hook";
 
@@ -9,6 +9,7 @@ class MainInit {
     public shartURL: string = "";
     public loadWindow: BrowserWindow = null;
     public mainWindow: BrowserWindow = null;
+    public trayWindow: BrowserWindow = null;
     private readonly childProcessGone = null;
 
     constructor() {
@@ -119,6 +120,7 @@ class MainInit {
         this.loadWindow.show();
         this.loadWindow.setAlwaysOnTop(true);
         setTimeout(() => {
+            this.createTrayWindow();
             this.createMainWindow();
         }, 1500);
     }
@@ -127,13 +129,17 @@ class MainInit {
         if (config.UseStartupChart) {
             return this.loadingWindow(this.shartURL);
         } else {
+            this.createTrayWindow();
             return this.createMainWindow();
         }
     }
 
-    trayWindow = () => {
+    toggleTrayWindow() {
 
-        const win = new BrowserWindow({
+    }
+
+    createTrayWindow = () => {
+        this.trayWindow = new BrowserWindow({
             width: 240,
             height: 120,
             show: true,
@@ -146,61 +152,61 @@ class MainInit {
             fullscreen: false,
             webPreferences: {
                 sandbox: false,
-                backgroundThrottling: false,
                 devTools: true,
+                backgroundThrottling: false,
                 preload: getPreloadFile('preload'),
             },
         });
 
+        this.trayWindow.loadURL(`${this.winURL}/systray`).catch(console.error);
 
-        win.loadURL(`${this.winURL}/systray`).catch(console.error);
-
-        win.on('ready-to-show', () => {
-            win.webContents.openDevTools({ mode: "undocked", activate: true });
-        });
-
-        function showWindow() {
-            const trayBounds = tray.getBounds();
-            const windowBounds = win.getBounds();
-
-            const x = Math.round(trayBounds.x + trayBounds.width / 2 - windowBounds.width / 2);
-            const y = Math.round(trayBounds.y + trayBounds.height);
-
-            win.setPosition(x, y, false);
-            win.show();
-            win.focus();
+        if (process.env.NODE_ENV === 'development') {
+            this.trayWindow.on('ready-to-show', () => {
+                this.trayWindow.webContents.openDevTools({ mode: "undocked", activate: true });
+            });
         }
 
-        function toggleWindow() {
-            if (win.isVisible()) {
-                win.hide();
-            } else {
-                showWindow();
-            }
-        }
+        // function showWindow() {
+        //     const trayBounds = tray.getBounds();
+        //     const windowBounds = win.getBounds();
+
+        //     const x = Math.round(trayBounds.x + trayBounds.width / 2 - windowBounds.width / 2);
+        //     const y = Math.round(trayBounds.y + trayBounds.height);
+
+        //     win.setPosition(x, y, false);
+        //     win.show();
+        //     win.focus();
+        // }
+
+        // function toggleWindow() {
+        //     if (win.isVisible()) {
+        //         win.hide();
+        //     } else {
+        //         showWindow();
+        //     }
+        // }
 
 
         const contextMenu = Menu.buildFromTemplate([
-            {
-                label: 'Show/Hide Window',
-                click: toggleWindow, // Hàm toggle để hiển thị hoặc ẩn cửa sổ
-            },
-            {
-                label: 'Quit',
-                click: () => {
-                    // app.quit(); // Thoát ứng dụng khi chọn Quit
-                },
-            },
+            { label: 'Quit', click: () => app.quit() }
         ]);
 
         const tray = new Tray('./assets/tray.png');
-
-        // Gắn menu vào tray icon
-        tray.setToolTip('Your Application');
+        tray.setToolTip('Omicx Dialer');
         tray.setContextMenu(contextMenu);
 
-        // Khi click vào tray icon
-        // tray.on('click', toggleWindow);
+        tray.on('click', () => {
+            if (!this.trayWindow.isVisible()) {
+                this.trayWindow.show();
+            }
+
+            if (!this.mainWindow) {
+                this.createMainWindow();
+            } else {
+                this.mainWindow.show();
+                this.mainWindow.focus();
+            }
+        });
     }
 }
 

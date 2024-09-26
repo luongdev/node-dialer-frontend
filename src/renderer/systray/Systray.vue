@@ -11,10 +11,13 @@
 import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 
+import { useSIP } from './store/sip';
+
+const sip = useSIP();
 const router = useRouter();
 
 onMounted(() => {
-
+  sip.connect();
   router.push('/call');
 
 });
