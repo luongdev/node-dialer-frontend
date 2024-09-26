@@ -12,7 +12,7 @@
         <div v-if="'REJECTED' === call.status" class="text-center mt-6">
           <p class="text-xl text-red-500">Cuộc gọi bị từ chối</p>
         </div>
-        <div v-if="'RINGING' === call.status || 'NEW' === call.status" class="flex justify-around w-full px-6 mt-10">
+        <div  class="flex justify-around w-full px-6 mt-10">
           <a-button type="primary" size="large" class="bg-green-500 text-white text-xl py-3 mx-2 rounded-lg"
             @click="call.answer">
             Answer

@@ -13,7 +13,8 @@ import antd from 'ant-design-vue';
 import { errorHandler } from "./error";
 import "./utils/hackIpcRenderer";
 import { callStoreMiddleware } from "@renderer/store/middlewares/call";
-import { storage, reset } from "./store/middlewares";
+import { storage } from "./store/middlewares/storage";
+import { reset } from "./store/middlewares/reset";
 
 const app = createApp(App);
 const store = createPinia();

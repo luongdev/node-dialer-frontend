@@ -80,6 +80,7 @@ export const useCall = defineStore({
 
             this[ResetFn]();
             this.current = call;
+            this.status = CallStatus.S_NEW;
         },
 
         make: async function (number: string, headers: { [k: string]: string } = {}) {

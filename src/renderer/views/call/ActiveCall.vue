@@ -5,15 +5,15 @@
       <!--        <a-avatar size={80} src="https://randomuser.me/api/portraits/men/75.jpg"/>-->
       <!--      </div>-->
       <div class="text-center mt-6">
-        <p class="text-2xl "> {{ call.to }} </p>
+        <p class="text-2xl "> {{ call.current?.to }} </p>
         <p class="text-xl text-gray-500 mt-2">
-          {{ !call.inbound && user.currentDID?.length ? user.currentDID : call.from }}
+          {{ !call.current.inbound && user.currentDID?.length ? user.currentDID : call.current?.from }}
         </p>
       </div>
 
       <div class="text-center mt-4">
         <p class="text-xl text-green-400 font-bold">{{ duration }}</p>
-        <p class="text-xl font-bold">{{ callStatusLabel }}</p>
+        <p class="text-xl font-bold">{{ label }}</p>
       </div>
 
       <div v-if="'TERMINATED' !== call.status" class="flex justify-center w-full px-6 mt-10">
@@ -77,14 +77,14 @@
 import {computed, onMounted, onUnmounted, watch} from "vue";
 import {useDuration} from "@renderer/utils/reusable/duration";
 import {useWebRTCAgent} from "@renderer/store/modules/agent/webrtc-agent";
-import {CallStatus, useCallStore} from "@renderer/store/modules/call/call";
+import {CallStatus, useCall, useLabel} from "@renderer/store/modules/call/call";
 import {useUserStore} from "@store/auth/user";
 
 const {startTime} = defineProps({
   startTime: {type: Number, default: () => Date.now()},
 })
 
-const call = useCallStore();
+const call = useCall();
 const user = useUserStore();
 const wrtcAgent = useWebRTCAgent();
 
@@ -96,24 +96,7 @@ const toNum = computed(() => {
 
 });
 
-const callStatusLabel = computed(() => {
-  switch (call.status) {
-    case CallStatus.S_NEW:
-    case CallStatus.S_CONNECTING:
-      return 'Đang khởi tạo';
-    case CallStatus.S_RINGING:
-      return 'Đang đổ chuông';
-    case CallStatus.S_ANSWERED:
-      return 'Đã kết nối';
-    case CallStatus.S_TERMINATED:
-      return 'Đã kết thúc';
-    case CallStatus.S_ERROR:
-      return 'Lỗi kết nối';
-    default:
-      return 'Đang kết nối';
-  }
-})
-
+const label = useLabel();
 const {duration, start, stop} = useDuration();
 
 watch(() => call.status, (status) => {

@@ -20,6 +20,7 @@ import {
 } from "jssip/lib/RTCSession";
 
 import { CallStatus, useCall } from '@store/call/call';
+import { ResetFn } from "@renderer/store/modules/types";
 
 const { ipcRendererChannel } = window;
 
@@ -161,30 +162,28 @@ const rtcSessionHandler = async (event: RTCSessionEvent, store: any) => {
 
     session.on('muted', async (event: any) => {
         console.debug('UA[onSessionMuted]: ', event);
-        store.mute = true;
+        const call = useCall();
+        call.mute = true;
 
-        await _broadcastCallState({ mute: true, hold: store.hold });
+        // await _broadcastCallState({ mute: true, hold: store.hold });
     });
 
     session.on('unmuted', async (event: any) => {
         console.debug('UA[onSessionUnmuted]: ', event);
-        store.mute = false;
-
-        await _broadcastCallState({ mute: false, hold: store.hold });
+        const call = useCall();
+        call.mute = false;
     });
 
     session.on('hold', async (event: any) => {
         console.debug('UA[onSessionHold]: ', event);
-        store.hold = true;
-
-        await _broadcastCallState({ hold: true, mute: store.mute });
+        const call = useCall();
+        call.hold = true;
     });
 
     session.on('unhold', async (event: any) => {
         console.debug('UA[onSessionUnhold]: ', event);
-        store.hold = false;
-
-        await _broadcastCallState({ hold: false, mute: store.mute });
+        const call = useCall();
+        call.hold = false;
     });
 
 
@@ -240,6 +239,7 @@ const onSessionConfirmed = async (event: IncomingAckEvent | OutgoingAckEvent) =>
 const onSessionEnded = async (event: EndEvent, store: any) => {
     console.debug('UA[onSessionEnded]: ', event);
     const call = useCall();
+    
     if ('Rejected' === event.cause) {
         call.status = CallStatus.S_REJECTED;
     } else if ('Terminated' !== event.cause) {
@@ -248,20 +248,9 @@ const onSessionEnded = async (event: EndEvent, store: any) => {
         call.status = CallStatus.S_TERMINATED;
     }
 
+    call.timer = setTimeout(() => call[ResetFn]?.(), 1500);
+
     store.session.removeAllListeners();
     store.session = null;
 }
 
-const _broadcastCallStatus = async (status: string) => {
-    return await ipcRendererChannel.Broadcast.invoke({
-        type: 'Call',
-        body: { event: 'StatusUpdated', payload: { status } },
-    });
-}
-
-const _broadcastCallState = async (state: { mute?: boolean, hold?: boolean }) => {
-    return await ipcRendererChannel.Broadcast.invoke({
-        type: 'Call',
-        body: { event: 'StateUpdated', payload: { ...state } },
-    });
-}

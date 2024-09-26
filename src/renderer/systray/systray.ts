@@ -9,7 +9,7 @@ import Systray from "./Systray.vue";
 
 import { sipMiddleware } from './store/middlewares/sip';
 import { audioMiddleware } from './store/middlewares/audio';
-import { reset } from '@renderer/store/middlewares';
+import { reset } from '@renderer/store/middlewares/reset';
 
 const router = createRouter({
     history: createWebHashHistory(),

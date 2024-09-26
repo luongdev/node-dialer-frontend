@@ -166,27 +166,6 @@ class MainInit {
             });
         }
 
-        // function showWindow() {
-        //     const trayBounds = tray.getBounds();
-        //     const windowBounds = win.getBounds();
-
-        //     const x = Math.round(trayBounds.x + trayBounds.width / 2 - windowBounds.width / 2);
-        //     const y = Math.round(trayBounds.y + trayBounds.height);
-
-        //     win.setPosition(x, y, false);
-        //     win.show();
-        //     win.focus();
-        // }
-
-        // function toggleWindow() {
-        //     if (win.isVisible()) {
-        //         win.hide();
-        //     } else {
-        //         showWindow();
-        //     }
-        // }
-
-
         const contextMenu = Menu.buildFromTemplate([
             { label: 'Quit', click: () => app.quit() }
         ]);

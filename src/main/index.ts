@@ -20,9 +20,7 @@ function onAppReady() {
   defaultIpc();
   createMenu()
 
-  const init = new InitWindow();
-  init.initWindow();
-  init.trayWindow();
+  new InitWindow().initWindow();
 
 
 

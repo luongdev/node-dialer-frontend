@@ -12,7 +12,7 @@
         <a-tooltip :title="call.status === 'RINGING' ? 'Từ chối' : 'Kết thúc'" placement="right">
           <button 
             @click="ternmiate" 
-            v-show="call.status && call.status !== 'TERMINATED'" 
+            v-show="call.status && call.status !== 'TERMINATED' && call.status !== 'REJECTED' && call.status !== 'ERROR'" 
             class="bg-red-500 text-white rounded-full w-10 h-10 flex justify-center items-center">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
@@ -79,21 +79,25 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
 
 import { useSIP } from '../store/sip';
 
 import { useDuration } from '@renderer/utils/reusable/duration';
 import { useCall, useLabel } from '@store/call/call';
+import { watch } from 'vue';
 
 const call = useCall();
 const callLabel = useLabel();
-
 const sip = useSIP();
-
-const phoneNumber = ref('0123456789');
-
 const { duration, start, stop } = useDuration();
+
+watch(() => call.status, (status) => {
+  if (status === 'ANSWERED') {
+    start();
+  } else if (status === 'TERMINATED') {
+    stop();
+  }
+});
 
 const answer = () => sip.answer();
 
@@ -112,5 +116,4 @@ const ternmiate = () => {
 const toggleMute = () => sip.toggleMute();
 
 const toggleHold = () => sip.toggleHold();
-
 </script>

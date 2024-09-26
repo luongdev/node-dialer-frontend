@@ -1,13 +1,27 @@
 import { PiniaPlugin } from 'pinia';
-import { ResetFn } from '@store/types';
 
 type updateFn = (key: string, value: any) => void;
+
+const tryParse = (value: any) => {
+  if ('string' !== typeof(value) || !value?.length) return value;
+
+  if ((value[0] === '{' && value[value.length - 1] === '}')
+    || (value[0] === '[' && value[value.length - 1] === ']')) {
+    return JSON.parse(value);
+  }
+
+  if (value === 'true' || value === 'false') return value === 'true';
+
+  if (!isNaN(+value)) return +value;
+}
 
 const newupdater = (store: any): updateFn => {
   const _store = store;
   const fn: updateFn = (key: string, value: any) => {
-    console.log(_store);
     if (!key?.length) return;
+
+    value = tryParse(value);
+    console.log(`Will update ${store.$id}[${key}] to: `, value);
 
     if (value !== _store[key]) {
       _store[key] = value;
@@ -19,11 +33,6 @@ const newupdater = (store: any): updateFn => {
 
 const updaters: Record<string, updateFn> = {};
 
-export const reset: PiniaPlugin = ({ store }) => {
-  const resetFn = store[ResetFn];
-  if ('function' === typeof (resetFn)) resetFn(store);
-}
-
 export const storage: PiniaPlugin = ({ store }) => {
   if (!updaters[store.$id]) {
     updaters[store.$id] = newupdater(store);
@@ -32,10 +41,9 @@ export const storage: PiniaPlugin = ({ store }) => {
 }
 
 window.addEventListener('storage', (event: StorageEvent) => {
-  if (!event.isTrusted) {
-    console.debug('Storage event', event);
-    return;
-  }
+  if (!event.isTrusted) return;
+  
+  console.debug('Storage event', event);
 
   const { key: eKey, newValue } = event;
   if (!eKey?.length) return;
