@@ -1,7 +1,7 @@
 import config from "@config/index";
-import {BrowserWindow, dialog, globalShortcut, Menu, Tray, nativeTheme} from "electron";
-import {winURL, loadingURL, getPreloadFile} from "../config/static-path";
-import {useProcessException} from "@main/hooks/exception-hook";
+import { BrowserWindow, dialog, globalShortcut, Menu, Tray, nativeTheme } from "electron";
+import { winURL, loadingURL, getPreloadFile } from "../config/static-path";
+import { useProcessException } from "@main/hooks/exception-hook";
 
 
 class MainInit {
@@ -12,7 +12,7 @@ class MainInit {
     private readonly childProcessGone = null;
 
     constructor() {
-        const {childProcessGone} = useProcessException();
+        const { childProcessGone } = useProcessException();
         this.winURL = winURL;
         this.shartURL = loadingURL;
         this.childProcessGone = childProcessGone;
@@ -61,7 +61,7 @@ class MainInit {
 
 
         globalShortcut.register('Alt+CommandOrControl+L', () => {
-            this.mainWindow.webContents.openDevTools({mode: "undocked", activate: true});
+            this.mainWindow.webContents.openDevTools({ mode: "undocked", activate: true });
         })
 
         if (process.env.NODE_ENV !== 'development') {
@@ -140,6 +140,10 @@ class MainInit {
             frame: false,
             resizable: false,
             alwaysOnTop: true,
+            maximizable: false,
+            minimizable: false,
+            fullscreenable: false,
+            fullscreen: false,
             webPreferences: {
                 sandbox: false,
                 backgroundThrottling: false,
@@ -152,7 +156,7 @@ class MainInit {
         win.loadURL(`${this.winURL}/systray`).catch(console.error);
 
         win.on('ready-to-show', () => {
-            win.webContents.openDevTools({mode: "undocked", activate: true});
+            win.webContents.openDevTools({ mode: "undocked", activate: true });
         });
 
         function showWindow() {
