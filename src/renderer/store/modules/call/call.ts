@@ -1,5 +1,7 @@
 import { causes } from "jssip/lib/Constants";
+import { RemovableRef, Serializer, useStorage } from '@vueuse/core';
 import { defineStore } from "pinia";
+import { ref } from "vue";
 
 const { ipcRendererChannel } = window;
 
@@ -15,24 +17,48 @@ export enum CallStatus {
 }
 causes
 export interface CallState {
-    id: string;
-    status: string;
-    inbound?: boolean;
-    from?: string;
-    to?: string;
-    startTime?: number;
-    answerTime?: number;
-    error?: string;
+    id: RemovableRef<string>;
+    status: RemovableRef<string>;
+    inbound: RemovableRef<boolean>;
+    from: RemovableRef<string>;
+    to: RemovableRef<string>;
+    startTime: RemovableRef<number>;
+    answerTime: RemovableRef<number>;
+    error: RemovableRef<string>;
     timer?: NodeJS.Timeout;
 
-    mute: boolean;
-    hold: boolean;
+    mute: RemovableRef<boolean>;
+    hold: RemovableRef<boolean>;
+}
+
+const JSONSerializer: Serializer<any> = {
+    read: (raw: string) => {
+        if (!raw) return undefined;
+
+        return JSON.parse(raw);
+    },
+    write: (value: any) => {
+        if (!value) return undefined;
+
+        return JSON.stringify(value);
+    }
 }
 
 export const useCallStore = defineStore({
     id: 'call',
     state: (): CallState => {
-        return { id: '', status: '', error: '', mute: false, hold: false };
+        const id = useStorage('call_id', ref(''));
+        const status = useStorage('call_status', ref(''));
+        const inbound = useStorage('call_inbound', null, localStorage, { serializer: JSONSerializer });
+        const from = useStorage('call_from', ref(''));
+        const to = useStorage('call_to', ref(''));
+        const startTime = useStorage('call_startTime', ref(0));
+        const answerTime = useStorage('call_answerTime', ref(0));
+        const error = useStorage('call_error', ref(''));
+        const mute = useStorage('call_mute', ref(false));
+        const hold = useStorage('call_hold', ref(false));
+
+        return { id, status, inbound, from, to, startTime, answerTime, error, mute, hold };
     },
     actions: {
         init: function (id: string, from: string, to: string, inbound: boolean) {
@@ -92,4 +118,8 @@ export const useCallStore = defineStore({
         },
 
     },
+});
+
+window.addEventListener('storage', (event: StorageEvent) => {
+    console.log('storage event', event);
 });

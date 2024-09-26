@@ -1,6 +1,6 @@
 <template>
+  <div class="fixed w-full h-4" style="-webkit-app-region: drag" />
   <div class="h-screen w-full">
-    <div class="w-full h-2 bg-red-100" style="-webkit-app-region: drag"></div>
     <router-view v-slot="{ Component }">
       <component :is="Component"/>
     </router-view>
@@ -8,5 +8,14 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 
+const router = useRouter();
+
+onMounted(() => {
+
+  router.push('/call');
+
+});
 </script>

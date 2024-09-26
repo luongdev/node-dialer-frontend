@@ -1,8 +1,7 @@
-
 <template>
-  Day la agent
+  Agent
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 
 </script>
