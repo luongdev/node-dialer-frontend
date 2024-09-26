@@ -48,35 +48,48 @@ export const useCallStore = defineStore({
             this.startTime = Date.now();
             this.error = '';
         },
+
+        make: async function (number: string, headers: { [k: string]: string } = {}) {
+            await ipcRendererChannel.Broadcast.invoke({
+                type: 'Call',
+                body: { event: 'Make', payload: { number, headers } },
+            });
+        },
+
         answer: async function () {
             await ipcRendererChannel.Broadcast.invoke({
                 type: 'Call',
                 body: { event: 'Answer' },
             });
         },
+
         reject: async function () {
             await ipcRendererChannel.Broadcast.invoke({
                 type: 'Call',
                 body: { event: 'Terminated', payload: { code: 486, cause: causes.REJECTED } },
             });
         },
-        terminate: async function () {
+
+        terminate: async function (code?: number, cause?: string) {
             await ipcRendererChannel.Broadcast.invoke({
                 type: 'Call',
-                body: { event: 'Terminated', payload: { code: 200, cause: causes.BYE } },
+                body: { event: 'Terminated', payload: { code: code ?? 200, cause: cause ?? 'NORMAL_CLEARING' } },
             });
         },
+
         toggleHold: async function () {
             await ipcRendererChannel.Broadcast.invoke({
                 type: 'Call',
                 body: { event: 'ToggleHold' },
             });
         },
+
         toggleMute: async function () {
             await ipcRendererChannel.Broadcast.invoke({
                 type: 'Call',
                 body: { event: 'ToggleMute' },
             });
-        }
+        },
+
     },
 });

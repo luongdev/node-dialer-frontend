@@ -27,24 +27,22 @@
 
 <script lang="ts" setup>
 import { CallStatus, useCallStore } from '@renderer/store/modules/call/call';
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 
-import { useWebRTCAgent } from '@renderer/store/modules/agent/webrtc-agent';
 import {useUserStore} from "@store/auth/user";
 
 const call = useCallStore();
 const user = useUserStore();
-const wrtcAgent = useWebRTCAgent();
 
 const terminateCall = () => {
   let code = 200;
-  let phrase = 'NORMAL_CLEARING';
+  let cause = 'BYE';
   if (CallStatus.S_ANSWERED !== call.status) {
     code = 487;
-    phrase = 'ORIGINATOR_CANCEL';
+    cause = 'ORIGINATOR_CANCEL';
   }
 
-  wrtcAgent.terminate(code, phrase);
+  call.terminate(code, cause);
 }
 
 const callStatusLabel = computed(() => {

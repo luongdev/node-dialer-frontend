@@ -18,6 +18,11 @@ ipcRendererChannel.BroadcastCall.on(async (_, data) => {
         if (status !== call.status) {
             call.status = status;
         }
+    } else if ('StateUpdated' === event) {
+        const state = payload || {};
+        Object.keys(state).forEach(k => {
+            if (call[k] !== state[k]) call[k] = state[k];
+        });
     }
 });
 

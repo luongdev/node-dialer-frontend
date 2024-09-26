@@ -23,11 +23,11 @@
       </div>
 
       <div v-if="'TERMINATED' !== call.status" class="flex justify-around w-full px-6 mt-8">
-        <a-tooltip :title="wrtcAgent.mute ? 'Unmute' : 'Mute'">
+        <a-tooltip :title="call.mute ? 'Unmute' : 'Mute'">
           <a-button
               @click="call.toggleMute"
               type="default" size="large" class="bg-gray-200 hover:bg-gray-300 text-gray-600 text-lg p-2 mx-1">
-            <svg v-if="wrtcAgent.mute" height="24" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+            <svg v-if="call.mute" height="24" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
               <path d="M176.4,181.3A72,72,0,0,1,56.4,136" fill="none" stroke="#000" stroke-linecap="round"
                     stroke-linejoin="round" stroke-width="16"/>
               <path d="M154.9,157.6A39.6,39.6,0,0,1,128,168h0a40,40,0,0,1-40-40V84" fill="none" stroke="#000"
@@ -51,11 +51,11 @@
             </svg>
           </a-button>
         </a-tooltip>
-        <a-tooltip :title="wrtcAgent.hold ? 'Unhold' : 'Hold'">
+        <a-tooltip :title="call.hold ? 'Unhold' : 'Hold'">
           <a-button
               @click="call.toggleHold"
               type="default" size="large" class="bg-gray-200 hover:bg-gray-300 text-gray-600 text-lg p-2 mx-1">
-            <svg v-if="wrtcAgent.hold" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+            <svg v-if="call.hold" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                  stroke-width="1.5" stroke="currentColor" class="size-6">
               <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5"/>
             </svg>
@@ -74,7 +74,7 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, onMounted, watch} from "vue";
+import {computed, onMounted, onUnmounted, watch} from "vue";
 import {useDuration} from "@renderer/utils/reusable/duration";
 import {useWebRTCAgent} from "@renderer/store/modules/agent/webrtc-agent";
 import {CallStatus, useCallStore} from "@renderer/store/modules/call/call";
@@ -124,19 +124,10 @@ watch(() => call.status, (status) => {
 
 
 onMounted(() => start(startTime));
-// onUnmounted(() => stop());
+onUnmounted(() => stop());
 
 const callHangup = () => {
   call.terminate();
 }
-
-const toggleMute = () => {
-  wrtcAgent.toggleMute();
-}
-
-const toggleHold = () => {
-  wrtcAgent.toggleHold();
-}
-
 
 </script>

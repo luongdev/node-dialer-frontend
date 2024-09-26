@@ -124,41 +124,6 @@ export const useWebRTCAgent = defineStore({
                 rtcOfferConstraints: {offerToReceiveAudio: true, offerToReceiveVideo: false}
             });
         },
-        answer: async function () {
-            if (!this.session) return;
-
-            const audio = useAudioStore();
-            const {local} = await audio.start();
-
-            this.session.answer({
-                mediaStream: local,
-                mediaConstraints: {audio: true, video: false},
-                rtcAnswerConstraints: {offerToReceiveAudio: true, offerToReceiveVideo: false},
-            })
-        },
-        toggleMute: async function() {
-            if (!this.session) return;
-
-            const { audio: audioMuted } = this.session.isMuted();
-            if (audioMuted) {
-                this.session.unmute({ audio: true });
-            } else {
-                this.session.mute({ audio: true });
-            }
-        },
-        toggleHold: async function() {
-            if (!this.session) return;
-
-            const { local: localHold } = this.session.isOnHold();
-            if (localHold) {
-                this.session.unhold();
-            } else {
-                this.session.hold();
-            }
-        },
-        terminate: function (code?: number, causes?: string) {
-            this.session.terminate({ status_code: code, reason_phrase: causes });
-        },
         stop: function () {
             if (_ua && _ua.isConnected()) {
                 _ua.stop();
@@ -170,7 +135,6 @@ export const useWebRTCAgent = defineStore({
                     }
                 })
             }
-
             this.connecting = false;
             this.connected = false;
             this.registering = false;

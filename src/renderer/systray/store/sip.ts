@@ -8,6 +8,7 @@ import { useAudio } from './audio';
 
 import { useUserStore } from '@store/auth/user';
 
+let _ua: UA;
 interface SIP {
     connecting: boolean;
     connected: boolean;
@@ -20,7 +21,6 @@ interface SIP {
     mute: boolean;
     hold: boolean;
 
-    ua?: UA;
     session?: RTCSession;
 }
 
@@ -59,7 +59,7 @@ export const useSIP = defineStore({
             const sockets = [new WebSocketInterface(`${proto}://${user.gateway}`)];
             const contact = new URI('sip', user.extension, user.domain, null, { transport: 'ws' }).toString();
 
-            this.ua = new UA({
+            _ua = new UA({
                 sockets,
                 uri: contact,
                 contact_uri: contact,
@@ -67,6 +67,37 @@ export const useSIP = defineStore({
                 user_agent: 'NowfAgent',
                 register: this.autoRegister,
             });
+
+            return _ua;
+        },
+
+        call: async function (number: string, headers: { [k: string]: string } = {}) {
+            if (!number || !_ua) return;
+
+            const user = useUserStore();
+            const {local} = await useAudio().start();
+
+            let target = number;
+            if (!number.startsWith('sip:')) {
+                target = `sip:${number}@${user.domain}`
+            }
+
+            if (user.currentDID?.length) {
+                headers['Dialed-Number'] = user.currentDID;
+            }
+
+            const extraHeaders = Object.keys(headers).map(k => {
+                return `X-${k}: ${headers[k]}`;
+            })
+
+            const session = _ua.call(target, {
+                extraHeaders,
+                mediaStream: local,
+                sessionTimersExpires: 120,
+                rtcOfferConstraints: {offerToReceiveAudio: true, offerToReceiveVideo: false}
+            });
+
+            return session;
         },
 
         toggleMute: async function () {
@@ -79,6 +110,7 @@ export const useSIP = defineStore({
                 this.session.mute({ audio: true });
             }
         },
+
         toggleHold: async function () {
             if (!this.session) return;
 
