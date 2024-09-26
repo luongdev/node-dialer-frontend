@@ -6,11 +6,8 @@
       <!--      </div>-->
       <div class="text-center mt-6">
         <p class="text-2xl "> {{ call.to }} </p>
-        <p v-if="!call.inbound" class="text-xl text-gray-500 mt-2">
-          {{ user.currentDID?.length ? user.currentDID : call.from }}
-        </p>
-        <p v-else class="text-xl text-gray-500 mt-2">
-          {{ call.from }}
+        <p class="text-xl text-gray-500 mt-2">
+          {{ !call.inbound && user.currentDID?.length ? user.currentDID : call.from }}
         </p>
       </div>
 
@@ -28,7 +25,7 @@
       <div v-if="'TERMINATED' !== call.status" class="flex justify-around w-full px-6 mt-8">
         <a-tooltip :title="wrtcAgent.mute ? 'Unmute' : 'Mute'">
           <a-button
-              @click="toggleMute"
+              @click="call.toggleMute"
               type="default" size="large" class="bg-gray-200 hover:bg-gray-300 text-gray-600 text-lg p-2 mx-1">
             <svg v-if="wrtcAgent.mute" height="24" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
               <path d="M176.4,181.3A72,72,0,0,1,56.4,136" fill="none" stroke="#000" stroke-linecap="round"
@@ -56,7 +53,7 @@
         </a-tooltip>
         <a-tooltip :title="wrtcAgent.hold ? 'Unhold' : 'Hold'">
           <a-button
-              @click="toggleHold"
+              @click="call.toggleHold"
               type="default" size="large" class="bg-gray-200 hover:bg-gray-300 text-gray-600 text-lg p-2 mx-1">
             <svg v-if="wrtcAgent.hold" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                  stroke-width="1.5" stroke="currentColor" class="size-6">
@@ -89,6 +86,7 @@ const {startTime} = defineProps({
 
 const call = useCallStore();
 const user = useUserStore();
+const wrtcAgent = useWebRTCAgent();
 
 const fromNum = computed(() => {
 
@@ -128,10 +126,8 @@ watch(() => call.status, (status) => {
 onMounted(() => start(startTime));
 // onUnmounted(() => stop());
 
-const wrtcAgent = useWebRTCAgent();
-
 const callHangup = () => {
-  wrtcAgent.terminate();
+  call.terminate();
 }
 
 const toggleMute = () => {

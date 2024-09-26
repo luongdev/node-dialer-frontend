@@ -10,9 +10,11 @@ import {
 import { useSIP } from "../sip";
 import { useAudio } from "../audio";
 import {
-    ConnectingEvent as RTCConnectingEvent, EndEvent,
+    EndEvent,
+    ConnectingEvent as RTCConnectingEvent, 
     IncomingAckEvent,
-    IncomingEvent, OutgoingAckEvent,
+    IncomingEvent, 
+    OutgoingAckEvent,
     OutgoingEvent
 } from "jssip/lib/RTCSession";
 
@@ -139,8 +141,8 @@ const rtcSessionHandler = async (event: RTCSessionEvent, store: any) => {
 
     session.on('accepted', (event: any) => onSessionAccepted(event, store));
     session.on('confirmed', onSessionConfirmed);
-    session.on('failed', onSessionEnded);
-    session.on('ended', onSessionEnded);
+    session.on('failed', (event: any) => onSessionEnded(event, store));
+    session.on('ended', (event: any) => onSessionEnded(event, store));
 
     session.on('muted', (event: any) => {
         console.debug('UA[onSessionMuted]: ', event);
@@ -203,7 +205,7 @@ const onSessionConfirmed = async (event: IncomingAckEvent | OutgoingAckEvent) =>
     await _broadcastCallStatus('ANSWERED');
 }
 
-const onSessionEnded = async (event: EndEvent) => {
+const onSessionEnded = async (event: EndEvent, store: any) => {
     console.debug('UA[onSessionEnded]: ', event);
     if ('Rejected' === event.cause) {
         await _broadcastCallStatus('REJECTED');
@@ -212,6 +214,9 @@ const onSessionEnded = async (event: EndEvent) => {
     } else {
         await _broadcastCallStatus('TERMINATED');
     }
+    
+    store.session.removeAllListeners();
+    store.session = null;
 }
 
 const _broadcastCallStatus = async (status: string) => {

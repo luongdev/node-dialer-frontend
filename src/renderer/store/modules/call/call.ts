@@ -54,10 +54,10 @@ export const useCallStore = defineStore({
         reject: async function() {
             await ipcRendererChannel.Broadcast.invoke({
                 type: 'Call',
-                body: {event: 'Terminated', payload: { code: 486, cause: causes.REDIRECTED }},
+                body: {event: 'Terminated', payload: { code: 486, cause: causes.REJECTED }},
             });
         },
-        termniate: async function() {
+        terminate: async function() {
             await ipcRendererChannel.Broadcast.invoke({
                 type: 'Call',
                 body: {event: 'Terminated', payload: { code: 200, cause: causes.BYE }},

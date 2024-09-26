@@ -52,6 +52,8 @@ export const callStoreMiddleware: PiniaPlugin = ({store}) => {
                         const back = router.currentRoute?.value?.redirectedFrom;
                         router?.push(back ?? '/')?.catch(console.error);
                     }, 3000);
+                    
+                    store.id = '';
                 }
                 break;
         }
