@@ -12,13 +12,16 @@ import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { useSIP } from './store/sip';
+import { useUser } from '@renderer/store/modules/auth/user';
 
 const sip = useSIP();
+const user = useUser();
 const router = useRouter();
 
 onMounted(() => {
-  sip.connect();
-  router.push('/call');
-
+  if (user.validate()) {
+    sip.connect();
+    router.push('/call');
+  }
 });
 </script>

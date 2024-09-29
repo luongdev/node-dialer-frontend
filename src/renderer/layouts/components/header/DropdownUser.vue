@@ -19,13 +19,13 @@
 import { ref } from 'vue';
 import { onClickOutside } from '@vueuse/core';
 
-import { useUserStore } from '@renderer/store/modules/auth/user';
+import { useUser } from '@renderer/store/modules/auth/user';
 import { useLoading } from "@store/loading";
 
 const loading = useLoading();
 
 
-const user = useUserStore();
+const user = useUser();
 
 const target = ref(null);
 const dropdownOpen = ref(false);
@@ -36,7 +36,7 @@ onClickOutside(target, () => {
 
 const onClickSignOut = async () => {
   loading.set(true);
-  user.clear();
+  // user.clear();
 }
 
 

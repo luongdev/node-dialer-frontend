@@ -29,10 +29,10 @@
 import { CallStatus, useCall } from '@renderer/store/modules/call/call';
 import { computed } from 'vue';
 
-import { useUserStore } from "@store/auth/user";
+import { useUser } from "@store/auth/user";
 
 const call = useCall();
-const user = useUserStore();
+const user = useUser();
 
 const terminateCall = () => {
   let code = 200;

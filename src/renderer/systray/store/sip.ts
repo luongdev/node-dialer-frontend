@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { UA, URI, WebSocketInterface } from 'jssip';
 import { useAudio } from './audio';
 
-import { useUserStore } from '@store/auth/user';
+import { useUser } from '@store/auth/user';
 
 let _ua: UA;
 
@@ -39,7 +39,8 @@ export const useSIP = defineStore({
             if (this.connected) return _ua;
 
             const audio = useAudio();
-            const user = useUserStore();
+            const user = useUser();
+            console.log(user);
             try {
                 await audio.start();
             } catch (e) {
@@ -70,7 +71,7 @@ export const useSIP = defineStore({
         call: async function (number: string, headers: { [k: string]: string } = {}) {
             if (!number || !_ua) return;
 
-            const user = useUserStore();
+            const user = useUser();
             const { local } = await useAudio().start();
 
             let target = number;

@@ -77,14 +77,14 @@
 import {computed, onMounted, onUnmounted, watch} from "vue";
 import {useDuration} from "@renderer/utils/reusable/duration";
 import {CallStatus, useCall, useLabel} from "@renderer/store/modules/call/call";
-import {useUserStore} from "@store/auth/user";
+import {useUser} from "@store/auth/user";
 
 const {startTime} = defineProps({
   startTime: {type: Number, default: () => Date.now()},
 })
 
 const call = useCall();
-const user = useUserStore();
+const user = useUser();
 
 const fromNum = computed(() => {
 

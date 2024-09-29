@@ -1,25 +1,25 @@
 <template>
   <a-spin :spinning="loading.state" size="large">
-    <a-page-header style="border: 1px solid rgb(235, 237, 240)" title="Login"/>
+    <a-page-header style="border: 1px solid rgb(235, 237, 240)" title="Login" />
     <div class="max-w-lg mx-auto p-4">
       <a-form :colon="false" :model="formState" :label-col="{ span: 5 }" :wrapper-col="{ span: 16 }" ref="loginFormRef"
-              autocomplete="off" @finish="onFinish" @finishFailed="onFinishFailed">
+        autocomplete="off" @finish="onFinish" @finishFailed="onFinishFailed">
         <a-form-item label="Extension" name="extension" placeholder="Extension"
-                     :rules="[{ required: true, message: 'Please input your extension!' }]">
-          <a-input v-model:value="formState.extension" class="w-full"/>
+          :rules="[{ required: true, message: 'Please input your extension!' }]">
+          <a-input v-model:value="formState.extension" class="w-full" />
         </a-form-item>
 
         <a-form-item label="Password" name="password"
-                     :rules="[{ required: true, message: 'Please input your password!' }]">
-          <a-input-password v-model:value="formState.password" class="w-full"/>
+          :rules="[{ required: true, message: 'Please input your password!' }]">
+          <a-input-password v-model:value="formState.password" class="w-full" />
         </a-form-item>
 
         <a-form-item label="Domain" name="domain" :rules="[{ required: true, message: 'Please input your domain!' }]">
-          <a-input v-model:value="formState.domain" class="w-full"/>
+          <a-input v-model:value="formState.domain" class="w-full" />
         </a-form-item>
 
         <a-form-item label="Gateway" name="gateway"
-                     :rules="[{ required: true, message: 'Please input your gateway!' }]">
+          :rules="[{ required: true, message: 'Please input your gateway!' }]">
           <a-input v-model:value="formState.gateway" class="w-full">
             <template #addonBefore>
               <a-select v-model:value="formState.protocol" style="width: 80px">
@@ -31,13 +31,13 @@
         </a-form-item>
 
         <a-form-item label="ICE:" v-if="true">
-          <a-switch v-model:checked="formState.iceEnabled"/>
+          <a-switch v-model:checked="formState.iceEnabled" />
         </a-form-item>
 
         <a-space block v-if="formState.iceEnabled" v-for="(server, index) in formState.iceServers" :key="`ICE-${index}`"
-                 class="w-full ant-custom">
+          class="w-full ant-custom">
           <a-form-item label=" " :name="['iceServers', index, 'address']"
-                       :rules="{ required: true, message: 'Please input ICE address' }">
+            :rules="{ required: true, message: 'Please input ICE address' }">
             <a-input v-model:value="(server as ICEServer).address" placeholder="Address">
               <template #addonBefore>
                 <a-select v-model:value="(server as ICEServer).protocol">
@@ -47,12 +47,12 @@
               </template>
 
               <template #addonAfter>
-              <span @click="removeICE(index)" class="cursor-pointer hover:border-red-400">
-                <svg xmlns="http://www.w3.org/2000/svg" height="24" fill="none" viewBox="0 0 24 24" stroke-width="{1.5}"
-                     stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14"/>
-                </svg>
-              </span>
+                <span @click="removeICE(index)" class="cursor-pointer hover:border-red-400">
+                  <svg xmlns="http://www.w3.org/2000/svg" height="24" fill="none" viewBox="0 0 24 24"
+                    stroke-width="{1.5}" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14" />
+                  </svg>
+                </span>
               </template>
             </a-input>
 
@@ -66,7 +66,7 @@
         </a-form-item>
 
         <a-form-item :wrapper-col="{ offset: 5, span: 16 }">
-          <a-button type="primary" html-type="submit" :loading="loading">Register</a-button>
+          <a-button type="primary" html-type="submit" :loading="loading.state">Register</a-button>
         </a-form-item>
       </a-form>
 
@@ -76,15 +76,15 @@
 
 <script setup lang="ts">
 
-import {reactive, ref, computed, watch, onMounted} from 'vue';
-import {useUserStore, ICEServer} from '@renderer/store/modules/auth/user';
-import {useLoading} from "@store/loading";
+import { reactive, ref, computed, onMounted } from 'vue';
+import { useUser, ICEServer } from '@renderer/store/modules/auth/user';
+import { useLoading } from "@store/loading";
 
-const {ipcRendererChannel} = window;
+const { ipcRendererChannel } = window;
 
 const loading = useLoading();
 
-const user = useUserStore();
+const user = useUser();
 
 const iceAddAllow = computed(() => {
   if (formState.iceServers.length > 2) {
@@ -145,7 +145,7 @@ onMounted(() => {
 
 const loginFormRef = ref();
 const onFinish = async () => {
-  const {extension, password, domain, gateway, protocol, iceServers, iceEnabled} = formState;
+  const { extension, password, domain, gateway, protocol, iceServers, iceEnabled } = formState;
 
   user.extension = extension;
   user.password = password;
@@ -184,7 +184,7 @@ const addICE = () => {
   if (!iceAddAllow) return;
 
   formState.iceServers = [
-    ...formState.iceServers, {address: '', protocol: 'stun'}
+    ...formState.iceServers, { address: '', protocol: 'stun' }
   ]
 }
 

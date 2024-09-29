@@ -8,11 +8,11 @@
 <script setup lang="ts">
 import TitleBar from "@renderer/components/title-bar/title-bar.vue";
 import {onMounted} from "vue";
-import {useUserStore} from "@store/auth/user";
+import {useUser} from "@store/auth/user";
 import {useRouter} from "vue-router";
 
 const router = useRouter();
-const user = useUserStore();
+const user = useUser();
 
 const {ipcRendererChannel} = window;
 

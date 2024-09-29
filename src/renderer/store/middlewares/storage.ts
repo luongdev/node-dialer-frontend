@@ -2,7 +2,7 @@ import { PiniaPlugin } from 'pinia';
 
 type updateFn = (key: string, value: any) => void;
 
-const tryParse = (value: any) => {
+export const tryParse = (value: any) => {
   if ('string' !== typeof(value) || !value?.length) return value;
 
   if ('null' === value || 'undefined' === value) return null;
@@ -44,18 +44,24 @@ export const storage: PiniaPlugin = ({ store }) => {
   }
 }
 
-window.addEventListener('storage', (event: StorageEvent) => {
-  if (!event.isTrusted) return;
+let storageHandled = false;
+
+if (!storageHandled) {
+  storageHandled = true;
+
+  window.addEventListener('storage', (event: StorageEvent) => {
+    if (!event.isTrusted) return;
+    
+    console.debug('Storage event', event);
   
-  console.debug('Storage event', event);
-
-  const { key: eKey, newValue } = event;
-  if (!eKey?.length) return;
-
-  const [id, key] = eKey.split('_');
-  const updater = updaters[id];
-  if ('function' === typeof (updater)) {
-    updater(key, newValue);
-    console.debug('Storage updated', { id, key, newValue });
-  }
-});
+    const { key: eKey, newValue } = event;
+    if (!eKey?.length) return;
+  
+    const [id, key] = eKey.split('_');
+    const updater = updaters[id];
+    if ('function' === typeof (updater)) {
+      updater(key, newValue);
+      console.debug('Storage updated', { id, key, newValue });
+    }
+  });
+}

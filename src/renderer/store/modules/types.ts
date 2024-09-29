@@ -1,16 +1,13 @@
 import { Serializer, useStorage } from '@vueuse/core';
+import { tryParse } from '../middlewares/storage';
 
 export const ResetFn = Symbol('reset');
 
 export const JSONSerializer: Serializer<any> = {
   read: (raw: string) => {
-    if (!raw || 'null' === raw || 'undefined' === raw) return null;
+    const val = tryParse(raw);
 
-    try {
-      return JSON.parse(raw);
-    } catch (_) {
-      return raw;
-    }
+    return val;
   },
   write: (value: any) => {
     if (!value) return value;
