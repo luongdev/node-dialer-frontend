@@ -5,6 +5,8 @@ type updateFn = (key: string, value: any) => void;
 const tryParse = (value: any) => {
   if ('string' !== typeof(value) || !value?.length) return value;
 
+  if ('null' === value || 'undefined' === value) return null;
+
   if ((value[0] === '{' && value[value.length - 1] === '}')
     || (value[0] === '[' && value[value.length - 1] === ']')) {
     return JSON.parse(value);
@@ -13,6 +15,8 @@ const tryParse = (value: any) => {
   if (value === 'true' || value === 'false') return value === 'true';
 
   if (!isNaN(+value)) return +value;
+
+  return value;
 }
 
 const newupdater = (store: any): updateFn => {

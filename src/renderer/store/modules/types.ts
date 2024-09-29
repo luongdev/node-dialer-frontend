@@ -13,7 +13,7 @@ export const JSONSerializer: Serializer<any> = {
     }
   },
   write: (value: any) => {
-    if (!value) return null;
+    if (!value) return value;
     if ('string' === typeof (value)) return value;
 
     return JSON.stringify(value);

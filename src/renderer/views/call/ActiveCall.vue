@@ -7,7 +7,7 @@
       <div class="text-center mt-6">
         <p class="text-2xl "> {{ call.current?.to }} </p>
         <p class="text-xl text-gray-500 mt-2">
-          {{ !call.current.inbound && user.currentDID?.length ? user.currentDID : call.current?.from }}
+          {{ !call.current?.inbound && user.currentDID?.length ? user.currentDID : call.current?.from }}
         </p>
       </div>
 

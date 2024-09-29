@@ -91,7 +91,8 @@ const callLabel = useLabel();
 const sip = useSIP();
 const { duration, start, stop } = useDuration();
 
-watch(() => call.status, (status) => {
+watch(() => call.status, (status, prevStatus) => {
+  console.log(`Call.vue from ${prevStatus} to ${status}`);
   if (status === 'ANSWERED') {
     start(call.answerTime);
   } else if (status === 'TERMINATED') {
