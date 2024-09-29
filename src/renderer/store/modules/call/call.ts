@@ -73,6 +73,11 @@ export const useCall = defineStore({
     },
     actions: {
         init: function (call: CallInfo) {
+            if (this.timer) {
+                clearTimeout(this.timer);
+                this.timer = null;
+            }
+
             if (this.current?.id) {
                 console.log('Call already exists: ', this.current);
                 return;
