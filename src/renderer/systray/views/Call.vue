@@ -19,7 +19,7 @@
             </svg>
           </button>
         </a-tooltip>
-        <a-tooltip :title="'Nhận'" placement="right">
+        <a-tooltip v-if="call.current?.inbound" :title="'Nhận'" placement="right">
           <button 
               @click="answer" 
               v-show="call.status === 'RINGING'" 

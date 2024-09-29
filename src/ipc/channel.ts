@@ -39,6 +39,8 @@ export class IpcChannelMainClass {
   }> = null;
 
   FocusMainWindow: IpcMainEventListener<string> = null;
+  ReloadTrayWindow: IpcMainEventListener<string> = null;
+
   Broadcast: IpcMainEventListener<unknown> = null;
 }
 

@@ -22,6 +22,7 @@ import {
 
 import { CallStatus, useCall } from '@store/call/call';
 import { ResetFn } from "@renderer/store/modules/types";
+import { useUser } from "@renderer/store/modules/auth/user";
 
 const { ipcRendererChannel } = window;
 
@@ -135,6 +136,8 @@ const bindEvents = (ua: UA, store: any) => {
 }
 
 const connectingHandler = async (_: ConnectingEvent, store: any) => {
+    const user = useUser();
+    user.loggedIn = false;
     store.connecting = true;
 }
 
@@ -159,6 +162,9 @@ const disconnectedHandler = async (event: DisconnectEvent, store: any) => {
 const registeredHandler = async (_: RegisteredEvent, store: any) => {
     store.registering = false;
     store.registered = true;
+
+    const user = useUser();
+    user.loggedIn = true;
 }
 
 const unregisteredHandler = async (_: UnRegisteredEvent, store: any) => {

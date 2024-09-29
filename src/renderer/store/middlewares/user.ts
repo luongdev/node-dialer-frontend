@@ -12,9 +12,6 @@ ipcRendererChannel.BroadcastAgent.on(async (_, data) => {
     const user = useUser();
     const loading = useLoading();
     if ('StateUpdated' === event) {
-        
-        console.log('asdfja;sdfkj', data);
-
         const { connecting, registering, registered, error } = payload || {};
         if (connecting || registering) loading.set(true);
 
@@ -45,10 +42,7 @@ export const userStoreMiddleware: PiniaPlugin = ({ store }) => {
                 await ipcRendererChannel.Broadcast.invoke({
                     type: 'Agent',
                     body: {
-                      event: 'StartConnect',
-                      payload: {
-                        ...store
-                      }
+                      event: 'StartConnect'
                     }
                   });
             });

@@ -1,3 +1,4 @@
+import { decrypt } from '@renderer/utils/crypto';
 import { PiniaPlugin } from 'pinia';
 
 type updateFn = (key: string, value: any) => void;
@@ -26,6 +27,10 @@ const newupdater = (store: any): updateFn => {
 
     value = tryParse(value);
     console.log(`Will update ${store.$id}[${key}] to: `, value);
+
+    if ('password' === key) {
+      value = decrypt(value);
+    }
 
     if (value !== _store[key]) {
       _store[key] = value;

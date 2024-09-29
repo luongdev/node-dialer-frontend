@@ -8,7 +8,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { useSIP } from './store/sip';
@@ -18,10 +18,18 @@ const sip = useSIP();
 const user = useUser();
 const router = useRouter();
 
-onMounted(() => {
-  if (user.validate()) {
-    sip.connect();
+watch(() => sip.registered, (registered) => {
+  if (registered) {
     router.push('/call');
+  } else {
+    router.push('/');
   }
+})
+
+onMounted(() => {
+  // if (user.validate()) {
+  //   sip.connect();
+  //   router.push('/call');
+  // }
 });
 </script>

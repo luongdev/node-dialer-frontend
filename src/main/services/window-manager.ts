@@ -47,11 +47,28 @@ class MainInit {
         this.mainWindow.once("ready-to-show", () => {
             this.mainWindow.show();
 
-
             this.mainWindow['name'] = 'MAIN';
             if (config.UseStartupChart) this.loadWindow.destroy();
         });
 
+
+        this.mainWindow.on('show', () => {
+            this.trayWindow?.hide();
+        });
+
+        this.mainWindow.on('closed', () => {
+            this.trayWindow?.show();
+        })
+
+        this.mainWindow.on('minimize', () => {
+            this.trayWindow?.show();
+        });
+
+        this.mainWindow.on('restore', () => this.trayWindow?.hide());
+
+        this.mainWindow.on('hide', () => {
+            this.trayWindow?.show();
+        });
 
         if (process.env.NODE_ENV === "development") {
             this.mainWindow.webContents.openDevTools({
@@ -60,25 +77,14 @@ class MainInit {
             });
         }
 
+        this.mainWindow.on('close', (event: Event) => {
+            event.preventDefault();
+            this.mainWindow.minimize();
+        });
 
         globalShortcut.register('Alt+CommandOrControl+L', () => {
             this.mainWindow.webContents.openDevTools({ mode: "undocked", activate: true });
-        })
-
-        if (process.env.NODE_ENV !== 'development') {
-            this.mainWindow.on('close', (event: Event) => {
-                const response = dialog.showMessageBoxSync(this.mainWindow, {
-                    type: 'question',
-                    buttons: ['Thoát', 'Không'],
-                    title: 'Xác nhận thoát ứng dụng',
-                    message: 'Bạn sẽ không còn nhận được cuộc gọi từ ứng dụng. Bạn vẫn muốn thoát?',
-                    defaultId: 1,
-
-                });
-
-                if (response == 1) event.preventDefault();
-            });
-        }
+        });
 
         this.mainWindow.on("unresponsive", () => {
             dialog
@@ -164,6 +170,7 @@ class MainInit {
 
         if (process.env.NODE_ENV === 'development') {
             this.trayWindow.on('ready-to-show', () => {
+                this.trayWindow['name'] = 'TRAY';
                 this.trayWindow.webContents.openDevTools({ mode: "undocked", activate: true });
             });
         }

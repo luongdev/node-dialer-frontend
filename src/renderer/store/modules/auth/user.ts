@@ -22,7 +22,7 @@ export interface UserState {
     currentDID: RemovableRef<string>;
     listDID: RemovableRef<string[]>;
 
-    loggedIn: boolean;
+    loggedIn: RemovableRef<boolean>;
     error?: string;
 }
 
@@ -55,17 +55,19 @@ export const StoredJSONSerializer: Serializer<any> = {
 export const useUser = defineStore({
     id: 'user',
     state: () => {
-        const extension = useLocal<string>('reg_extension', null);
-        const domain = useLocal<string>('reg_domain', null);
-        const gateway = useLocal<string>('reg_gateway', null);
-        const tls = useLocal<boolean>('reg_tls', null);
-        const iceServers = useLocal<(ICEServer | string)[]>('reg_iceServers', []);
-        const password = useStorage<string>('reg_password', null, localStorage, { serializer: StoredEncryptSerializer });
+        const extension = useLocal<string>('user_extension', null);
+        const domain = useLocal<string>('user_domain', null);
+        const gateway = useLocal<string>('user_gateway', null);
+        const tls = useLocal<boolean>('user_tls', null);
+        const iceServers = useLocal<(ICEServer | string)[]>('user_iceServers', []);
+        const password = useStorage<string>('user_password', null, localStorage, { serializer: StoredEncryptSerializer });
 
         const currentDID = useLocal<string>('call_currentDID', null);
         const listDID = useLocal<string[]>('call_listDID', []);
 
-        return { extension, domain, gateway, tls, iceServers, password, currentDID, listDID, loggedIn: false, error: null };
+        const loggedIn = useLocal<boolean>('user_loggedIn', null);
+
+        return { extension, domain, gateway, tls, iceServers, password, currentDID, listDID, loggedIn, error: null };
     },
     actions: {
         register: async function () {

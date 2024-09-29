@@ -80,8 +80,6 @@ import { reactive, ref, computed, onMounted } from 'vue';
 import { useUser, ICEServer } from '@renderer/store/modules/auth/user';
 import { useLoading } from "@store/loading";
 
-const { ipcRendererChannel } = window;
-
 const loading = useLoading();
 
 const user = useUser();
@@ -160,13 +158,7 @@ const onFinish = async () => {
     user.iceServers = [];
   }
 
-  wrtcAgent.start();
-  await ipcRendererChannel.Broadcast.invoke({
-    type: 'Agent',
-    body: {
-      event: 'StartConnect'
-    }
-  });
+  user.register();
 
   loading.set(true);
 };

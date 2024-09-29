@@ -40,7 +40,6 @@ export const useSIP = defineStore({
 
             const audio = useAudio();
             const user = useUser();
-            console.log(user);
             try {
                 await audio.start();
             } catch (e) {

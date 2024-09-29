@@ -14,7 +14,6 @@ export class IpcMainHandleClass implements IIpcMainHandle {
   }
 
 
-
   StartDownload = (event: IpcMainInvokeEvent, downloadUrl: string): void | Promise<void> => {
     new DownloadFile(BrowserWindow.fromWebContents(event.sender), downloadUrl).start();
   }
@@ -138,6 +137,14 @@ export class IpcMainHandleClass implements IIpcMainHandle {
     }
 
     // mainWindow.loadURL(winURL + `#${url}`);
+  }
+
+
+  ReloadTrayWindow = (event: IpcMainInvokeEvent, args: string) => {
+    let trayWindow = BrowserWindow.getAllWindows()?.find(w => 'TRAY' === w['name']);
+    if (!trayWindow) {
+      trayWindow.reload();
+    }
   }
 
   Broadcast = (event: IpcMainInvokeEvent, { type, body }) => {
