@@ -16,8 +16,13 @@ import {
     IncomingAckEvent,
     IncomingEvent,
     OutgoingAckEvent,
-    OutgoingEvent
+    OutgoingEvent,
+    RTCSession
 } from "jssip/lib/RTCSession";
+
+import { CallStatus, useCall } from '@store/call/call';
+import { ResetFn } from "@renderer/store/modules/types";
+import { useUser } from "@renderer/store/modules/auth/user";
 
 const { ipcRendererChannel } = window;
 
@@ -25,11 +30,13 @@ ipcRendererChannel.BroadcastAgent.on(async (_, data) => {
     const { event } = data || {};
 
     const sip = useSIP();
+    const audio = useAudio();
     if ('StartConnect' === event) {
-        const audio = useAudio();
         await audio.start();
-
-        await sip.connect()
+        await sip.connect();
+    } else if ('Stop' === event) {
+        sip.close();
+        audio.stop();
     }
 });
 
@@ -41,10 +48,10 @@ ipcRendererChannel.BroadcastCall.on(async (_, data) => {
         const { number, headers } = payload || {};
         sip.call(number, headers);
     } else if ('Answer' === event) {
-        sip.session?.answer();
+        sip.answer();
     } else if ('Terminated' === event) {
         const { code, cause } = payload || {};
-        sip.session?.terminate({ status_code: code, reason_phrase: cause });
+        sip.terminate(code, cause);
     } else if ('ToggleHold' === event) {
         await sip.toggleHold();
     } else if ('ToggleMute' === event) {
@@ -58,16 +65,54 @@ const connectInject = async (ua: UA, store: any) => {
     ua.start();
 }
 
+let _session: RTCSession;
+
 export const sipMiddleware: PiniaPlugin = ({ store }) => {
     if (store.$id !== 'sip') return;
 
     store.$onAction(act => {
         if (act.name === 'connect') {
-            act.after(async (ua: UA) => await connectInject(ua, act.store));
+            act.after(async (ua: UA) => {
+                if (!ua) {
+                    console.warn('Events bind before ua created');
+                    return;
+                }
+
+                if (!store.connected) {
+                    await connectInject(ua, act.store)
+                }
+            });
         } else if (act.name === 'call') {
             act.after(async (session) => {
-                if (!session) {
-                    await _broadcastCallStatus('ERROR');
+                if (!session) { useCall().status = CallStatus.S_ERROR; }
+            });
+        } else if (act.name === 'answer') {
+            act.after(() => {
+                _session.answer({
+                    pcConfig: { iceServers: [] },
+                    rtcAnswerConstraints: { offerToReceiveAudio: true, offerToReceiveVideo: false },
+                });
+            });
+        } else if (act.name === 'terminate') {
+            act.after(({ code, cause }: { code?: number; cause?: string }) => {
+                _session.terminate({ status_code: code ?? 200, reason_phrase: cause ?? 'NORMAL_CLEARING' });
+            });
+        } else if (act.name === 'toggleMute') {
+            act.after(() => {
+                const { audio: audioMuted } = _session.isMuted();
+                if (audioMuted) {
+                    _session.unmute({ audio: true });
+                } else {
+                    _session.mute({ audio: true });
+                }
+            });
+        } else if (act.name === 'toggleHold') {
+            act.after(() => {
+                const { local: localHold } = _session.isOnHold();
+                if (localHold) {
+                    _session.unhold();
+                } else {
+                    _session.hold();
                 }
             });
         }
@@ -96,6 +141,8 @@ const bindEvents = (ua: UA, store: any) => {
 }
 
 const connectingHandler = async (_: ConnectingEvent, store: any) => {
+    const user = useUser();
+    user.loggedIn = false;
     store.connecting = true;
 }
 
@@ -109,17 +156,25 @@ const connectedHandler = async (_: ConnectedEvent, store: any) => {
 }
 
 const disconnectedHandler = async (event: DisconnectEvent, store: any) => {
+    const user = useUser();
+    user.loggedIn = false;
+
     store.connected = false;
     store.connecting = false;
 
     if (event.error) {
         store.error = event.reason;
+        user.error = event.reason;
     }
+
 }
 
 const registeredHandler = async (_: RegisteredEvent, store: any) => {
     store.registering = false;
     store.registered = true;
+
+    const user = useUser();
+    user.loggedIn = true;
 }
 
 const unregisteredHandler = async (_: UnRegisteredEvent, store: any) => {
@@ -143,15 +198,16 @@ const rtcSessionHandler = async (event: RTCSessionEvent, store: any) => {
         return;
     }
 
-    store.session = session;
-    await ipcRendererChannel.Broadcast.invoke({
-        type: 'Call',
-        body: {
-            event: 'Initialized',
-            payload: { from: from.uri.user, to: to.uri.user, id: session.id, inbound: event.originator !== 'local' },
-        }
-    });
+    _session = session;
 
+    const call = useCall();
+    call.init({
+        id: session.id,
+        to: to.uri.user,
+        from: from.uri.user,
+        startTime: Date.now(),
+        inbound: event.originator === 'remote',
+    });
 
     session.on('accepted', (event: any) => onSessionAccepted(event, store));
     session.on('confirmed', onSessionConfirmed);
@@ -160,30 +216,28 @@ const rtcSessionHandler = async (event: RTCSessionEvent, store: any) => {
 
     session.on('muted', async (event: any) => {
         console.debug('UA[onSessionMuted]: ', event);
-        store.mute = true;
+        const call = useCall();
+        call.mute = true;
 
-        await _broadcastCallState({ mute: true, hold: store.hold });
+        // await _broadcastCallState({ mute: true, hold: store.hold });
     });
 
     session.on('unmuted', async (event: any) => {
         console.debug('UA[onSessionUnmuted]: ', event);
-        store.mute = false;
-
-        await _broadcastCallState({ mute: false, hold: store.hold });
+        const call = useCall();
+        call.mute = false;
     });
 
     session.on('hold', async (event: any) => {
         console.debug('UA[onSessionHold]: ', event);
-        store.hold = true;
-
-        await _broadcastCallState({ hold: true, mute: store.mute });
+        const call = useCall();
+        call.hold = true;
     });
 
     session.on('unhold', async (event: any) => {
         console.debug('UA[onSessionUnhold]: ', event);
-        store.hold = false;
-
-        await _broadcastCallState({ hold: false, mute: store.mute });
+        const call = useCall();
+        call.hold = false;
     });
 
 
@@ -200,18 +254,24 @@ const rtcSessionHandler = async (event: RTCSessionEvent, store: any) => {
 
 const onSessionConnecting = async (event: RTCConnectingEvent) => {
     console.debug('UA[onSessionConnecting]: ', event);
-    await _broadcastCallStatus('CONNECTING');
+
+    const call = useCall();
+    call.status = CallStatus.S_CONNECTING;
 }
 
 const onSessionAccepted = async (event: (IncomingEvent | OutgoingEvent), store: any) => {
     console.debug('UA[onSessionAccepted]: ', event);
-    await _broadcastCallStatus('ANSWERED');
+
+    const call = useCall();
+    call.answerTime = Date.now();
+    call.status = CallStatus.S_ANSWERED;
+
     const audio = useAudio();
     if (!audio.remote) {
         audio.remote = new MediaStream();
     }
 
-    store.session?.connection?.getReceivers()?.forEach((receiver: any) => {
+    _session?.connection?.getReceivers()?.forEach((receiver: any) => {
         if (receiver.track) audio.remote.addTrack(receiver.track);
     })
     audio.play();
@@ -219,38 +279,30 @@ const onSessionAccepted = async (event: (IncomingEvent | OutgoingEvent), store: 
 
 const onSessionProgress = async (event: IncomingEvent | OutgoingEvent) => {
     console.debug('UA[onSessionProgress]: ', event);
-    await _broadcastCallStatus('RINGING');
+
+    const call = useCall();
+    call.status = CallStatus.S_RINGING;
 }
 
 const onSessionConfirmed = async (event: IncomingAckEvent | OutgoingAckEvent) => {
     console.debug('UA[onSessionConfirmed]: ', event);
-    await _broadcastCallStatus('ANSWERED');
+
+    const call = useCall();
+    call.status = CallStatus.S_ANSWERED;
 }
 
 const onSessionEnded = async (event: EndEvent, store: any) => {
     console.debug('UA[onSessionEnded]: ', event);
+    const call = useCall();
+
     if ('Rejected' === event.cause) {
-        await _broadcastCallStatus('REJECTED');
+        call.status = CallStatus.S_REJECTED;
     } else if ('Terminated' !== event.cause) {
-        await _broadcastCallStatus('ERROR');
+        call.status = CallStatus.S_ERROR;
     } else {
-        await _broadcastCallStatus('TERMINATED');
+        call.status = CallStatus.S_TERMINATED;
     }
 
-    store.session.removeAllListeners();
-    store.session = null;
+    call.timer = setTimeout(() => call[ResetFn]?.(), 1500);
 }
 
-const _broadcastCallStatus = async (status: string) => {
-    return await ipcRendererChannel.Broadcast.invoke({
-        type: 'Call',
-        body: { event: 'StatusUpdated', payload: { status } },
-    });
-}
-
-const _broadcastCallState = async (state: { mute?: boolean, hold?: boolean }) => {
-    return await ipcRendererChannel.Broadcast.invoke({
-        type: 'Call',
-        body: { event: 'StateUpdated', payload: { ...state } },
-    });
-}

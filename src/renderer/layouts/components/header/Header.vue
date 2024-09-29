@@ -22,9 +22,9 @@ import { ref, watch } from 'vue';
 import DropdownUser from './DropdownUser.vue'
 import DropdownStatus from "./DropdownStatus.vue";
 import Pinger from './Pingger.vue';
-import { useUserStore } from '@renderer/store/modules/auth/user';
+import { useUser } from '@renderer/store/modules/auth/user';
 
-const user = useUserStore();
+const user = useUser();
 const ping = ref(true);
 
 const pingUrl = ref(`${user.tls ? 'https' : 'http'}://${user.gateway}`);

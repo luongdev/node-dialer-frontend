@@ -30,7 +30,7 @@
 </template>
 <script lang="ts" setup>
 import {defineComponent, reactive, ref} from 'vue';
-import {useUserStore} from "@store/auth/user";
+import {useUser} from "@store/auth/user";
 
 const regex = /^\d{8,12}$/;
 
@@ -41,7 +41,7 @@ const VNodes = defineComponent({
   }
 });
 
-const user = useUserStore();
+const user = useUser();
 
 const items = ref(user.listDID);
 const name = reactive({value: '', status: ''});

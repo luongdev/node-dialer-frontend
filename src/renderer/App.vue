@@ -1,31 +1,35 @@
 <template>
-  <title-bar/>
+  <title-bar />
   <router-view v-slot="{ Component }">
-    <component :is="Component"/>
+    <component :is="Component" />
   </router-view>
 </template>
 
 <script setup lang="ts">
 import TitleBar from "@renderer/components/title-bar/title-bar.vue";
-import {onMounted, watch} from "vue";
-import {useUserStore} from "@store/auth/user";
-import {useRouter} from "vue-router";
+import { onMounted, watch } from "vue";
+import { useUser } from "@store/auth/user";
+import { useRouter } from "vue-router";
+import { useLoading } from "./store/modules/loading";
 
 const router = useRouter();
-const user = useUserStore();
+const user = useUser();
+const loading = useLoading();
 
-const {ipcRendererChannel} = window;
+watch(() => user.loggedIn, (loggedIn) => initRoute(loggedIn));
 
 onMounted(async () => {
   if (user.validate()) {
-    await ipcRendererChannel.Broadcast.invoke({
-      type: 'Agent',
-      body: {event: 'StartConnect'}
-    })
-  } else {
-    await router.push('/signin');
+    user.register();
   }
+
+  initRoute(user.loggedIn);
 });
+
+const initRoute = (loggedIn: boolean) => {
+  router.push(loggedIn ? '/' : '/signin').catch(console.error);
+  loading.set(false);
+}
 
 </script>
 

@@ -8,14 +8,28 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
+import { useSIP } from './store/sip';
+import { useUser } from '@renderer/store/modules/auth/user';
+
+const sip = useSIP();
+const user = useUser();
 const router = useRouter();
 
+watch(() => sip.registered, (registered) => {
+  if (registered) {
+    router.push('/call');
+  } else {
+    router.push('/');
+  }
+})
+
 onMounted(() => {
-
-  router.push('/call');
-
+  if (user.validate()) {
+    sip.connect();
+    router.push('/call');
+  }
 });
 </script>

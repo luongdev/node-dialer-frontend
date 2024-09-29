@@ -1,19 +1,22 @@
 import config from "@config/index";
-import { BrowserWindow, dialog, globalShortcut, Menu, Tray, nativeTheme } from "electron";
-import { winURL, loadingURL, getPreloadFile } from "../config/static-path";
+import { BrowserWindow, globalShortcut, Menu, Tray, app } from "electron";
+import { winURL, trayURL, loadingURL, getPreloadFile } from "../config/static-path";
 import { useProcessException } from "@main/hooks/exception-hook";
 
 
 class MainInit {
     public winURL: string = "";
+    public trayURL: string = "";
     public shartURL: string = "";
     public loadWindow: BrowserWindow = null;
     public mainWindow: BrowserWindow = null;
+    public trayWindow: BrowserWindow = null;
     private readonly childProcessGone = null;
 
     constructor() {
         const { childProcessGone } = useProcessException();
         this.winURL = winURL;
+        this.trayURL = trayURL;
         this.shartURL = loadingURL;
         this.childProcessGone = childProcessGone;
     }
@@ -46,53 +49,60 @@ class MainInit {
         this.mainWindow.once("ready-to-show", () => {
             this.mainWindow.show();
 
-
             this.mainWindow['name'] = 'MAIN';
             if (config.UseStartupChart) this.loadWindow.destroy();
         });
-
 
         if (process.env.NODE_ENV === "development") {
             this.mainWindow.webContents.openDevTools({
                 mode: "undocked",
                 activate: true,
             });
+        } else {
+            this.mainWindow.on('show', () => {
+                this.trayWindow?.hide();
+            });
+
+            this.mainWindow.on('closed', () => {
+                this.trayWindow?.show();
+            })
+
+            this.mainWindow.on('minimize', () => {
+                this.trayWindow?.show();
+            });
+
+            this.mainWindow.on('restore', () => this.trayWindow?.hide());
+
+            this.mainWindow.on('hide', () => {
+                this.trayWindow?.show();
+            });
+
+            this.mainWindow.on('close', (event: Event) => {
+                event.preventDefault();
+                this.mainWindow.minimize();
+            });
         }
+
 
 
         globalShortcut.register('Alt+CommandOrControl+L', () => {
             this.mainWindow.webContents.openDevTools({ mode: "undocked", activate: true });
-        })
-
-        if (process.env.NODE_ENV !== 'development') {
-            this.mainWindow.on('close', (event: Event) => {
-                const response = dialog.showMessageBoxSync(this.mainWindow, {
-                    type: 'question',
-                    buttons: ['Thoát', 'Không'],
-                    title: 'Xác nhận thoát ứng dụng',
-                    message: 'Bạn sẽ không còn nhận được cuộc gọi từ ứng dụng. Bạn vẫn muốn thoát?',
-                    defaultId: 1,
-
-                });
-
-                if (response == 1) event.preventDefault();
-            });
-        }
-
-        this.mainWindow.on("unresponsive", () => {
-            dialog
-                .showMessageBox(this.mainWindow, {
-                    type: "warning",
-                    title: "warn",
-                    buttons: ["Overload", "quit"],
-                    message: "Graphical process becomes unresponsive，Whether to wait for it to recover？",
-                    noLink: true,
-                })
-                .then((res) => {
-                    if (res.response === 0) this.mainWindow.reload();
-                    else this.mainWindow.close();
-                });
         });
+
+        // this.mainWindow.on("unresponsive", () => {
+        //     dialog
+        //         .showMessageBox(this.mainWindow, {
+        //             type: "warning",
+        //             title: "warn",
+        //             buttons: ["Overload", "quit"],
+        //             message: "Graphical process becomes unresponsive，Whether to wait for it to recover？",
+        //             noLink: true,
+        //         })
+        //         .then((res) => {
+        //             if (res.response === 0) this.mainWindow.reload();
+        //             else this.mainWindow.close();
+        //         });
+        // });
 
         this.childProcessGone(this.mainWindow);
         this.mainWindow.on("closed", () => {
@@ -119,6 +129,7 @@ class MainInit {
         this.loadWindow.show();
         this.loadWindow.setAlwaysOnTop(true);
         setTimeout(() => {
+            this.createTrayWindow();
             this.createMainWindow();
         }, 1500);
     }
@@ -127,13 +138,13 @@ class MainInit {
         if (config.UseStartupChart) {
             return this.loadingWindow(this.shartURL);
         } else {
+            this.createTrayWindow();
             return this.createMainWindow();
         }
     }
 
-    trayWindow = () => {
-
-        const win = new BrowserWindow({
+    createTrayWindow = () => {
+        this.trayWindow = new BrowserWindow({
             width: 240,
             height: 120,
             show: true,
@@ -144,63 +155,45 @@ class MainInit {
             minimizable: false,
             fullscreenable: false,
             fullscreen: false,
+            closable: false,
+            skipTaskbar: true,
             webPreferences: {
                 sandbox: false,
-                backgroundThrottling: false,
                 devTools: true,
+                backgroundThrottling: false,
                 preload: getPreloadFile('preload'),
             },
         });
 
+        this.trayWindow.loadURL(trayURL).catch(console.error);
 
-        win.loadURL(`${this.winURL}/systray`).catch(console.error);
-
-        win.on('ready-to-show', () => {
-            win.webContents.openDevTools({ mode: "undocked", activate: true });
-        });
-
-        function showWindow() {
-            const trayBounds = tray.getBounds();
-            const windowBounds = win.getBounds();
-
-            const x = Math.round(trayBounds.x + trayBounds.width / 2 - windowBounds.width / 2);
-            const y = Math.round(trayBounds.y + trayBounds.height);
-
-            win.setPosition(x, y, false);
-            win.show();
-            win.focus();
+        if (process.env.NODE_ENV === 'development') {
+            this.trayWindow.on('ready-to-show', () => {
+                this.trayWindow['name'] = 'TRAY';
+                this.trayWindow.webContents.openDevTools({ mode: "undocked", activate: true });
+            });
         }
-
-        function toggleWindow() {
-            if (win.isVisible()) {
-                win.hide();
-            } else {
-                showWindow();
-            }
-        }
-
 
         const contextMenu = Menu.buildFromTemplate([
-            {
-                label: 'Show/Hide Window',
-                click: toggleWindow, // Hàm toggle để hiển thị hoặc ẩn cửa sổ
-            },
-            {
-                label: 'Quit',
-                click: () => {
-                    // app.quit(); // Thoát ứng dụng khi chọn Quit
-                },
-            },
+            { label: 'Quit', click: () => app.quit() }
         ]);
 
         const tray = new Tray('./assets/tray.png');
-
-        // Gắn menu vào tray icon
-        tray.setToolTip('Your Application');
+        tray.setToolTip('Omicx Dialer');
         tray.setContextMenu(contextMenu);
 
-        // Khi click vào tray icon
-        // tray.on('click', toggleWindow);
+        tray.on('click', () => {
+            if (!this.trayWindow.isVisible()) {
+                this.trayWindow.show();
+            }
+
+            if (!this.mainWindow) {
+                this.createMainWindow();
+            } else {
+                this.mainWindow.show();
+                this.mainWindow.focus();
+            }
+        });
     }
 }
 

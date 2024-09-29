@@ -1,14 +1,11 @@
 import { defineStore } from 'pinia';
 import { UA, URI, WebSocketInterface } from 'jssip';
-import {
-    RTCSession
-} from 'jssip/lib/RTCSession';
-
 import { useAudio } from './audio';
 
-import { useUserStore } from '@store/auth/user';
+import { useUser } from '@store/auth/user';
 
 let _ua: UA;
+
 interface SIP {
     connecting: boolean;
     connected: boolean;
@@ -20,8 +17,6 @@ interface SIP {
 
     mute: boolean;
     hold: boolean;
-
-    session?: RTCSession;
 }
 
 export const useSIP = defineStore({
@@ -39,12 +34,10 @@ export const useSIP = defineStore({
     },
     actions: {
         connect: async function () {
-            if (this.connecting || this.connected) {
-                return;
-            }
+            if (this.connected) return _ua;
 
             const audio = useAudio();
-            const user = useUserStore();
+            const user = useUser();
             try {
                 await audio.start();
             } catch (e) {
@@ -52,8 +45,7 @@ export const useSIP = defineStore({
                 return;
             }
 
-            this.connecting = true;
-            this.error = undefined;
+            this.clearFlags();
 
             const proto = !user.tls ? 'ws' : 'wss';
             const sockets = [new WebSocketInterface(`${proto}://${user.gateway}`)];
@@ -67,6 +59,7 @@ export const useSIP = defineStore({
                 user_agent: 'NowfAgent',
                 register: this.autoRegister,
             });
+            this.connecting = true;
 
             return _ua;
         },
@@ -74,8 +67,8 @@ export const useSIP = defineStore({
         call: async function (number: string, headers: { [k: string]: string } = {}) {
             if (!number || !_ua) return;
 
-            const user = useUserStore();
-            const {local} = await useAudio().start();
+            const user = useUser();
+            const { local } = await useAudio().start();
 
             let target = number;
             if (!number.startsWith('sip:')) {
@@ -94,34 +87,46 @@ export const useSIP = defineStore({
                 extraHeaders,
                 mediaStream: local,
                 sessionTimersExpires: 120,
-                rtcOfferConstraints: {offerToReceiveAudio: true, offerToReceiveVideo: false}
+                rtcOfferConstraints: { offerToReceiveAudio: true, offerToReceiveVideo: false }
             });
 
-            return session;
+            return this.set(session);
+        },
+
+        answer: async function () {
+            return true;
+        },
+
+        terminate: async function (code?: number, cause?: string) {
+            return { code, cause };
         },
 
         toggleMute: async function () {
-            if (!this.session) return;
-
-            const { audio: audioMuted } = this.session.isMuted();
-            if (audioMuted) {
-                this.session.unmute({ audio: true });
-            } else {
-                this.session.mute({ audio: true });
-            }
+            return true;
         },
 
         toggleHold: async function () {
-            if (!this.session) return;
-
-            const { local: localHold } = this.session.isOnHold();
-            if (localHold) {
-                this.session.unhold();
-            } else {
-                this.session.hold();
-            }
+            return true;
         },
 
+        close: function () {
+            if (!_ua) {
+                return;
+            }
+
+            _ua.unregister();
+            _ua.stop();
+
+            _ua = null;
+            this.clearFlags();
+        },
+
+        clearFlags: function () {
+            this.error = null;
+            this.connecting = false;
+            this.connected = false;
+            this.registering = false;
+            this.registered = false;
+        }
     }
 });
-

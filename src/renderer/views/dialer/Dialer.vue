@@ -44,10 +44,10 @@ import DID from "@renderer/views/dialer/DID.vue";
 const maxLength = 12;
 
 import Numpad from '@renderer/components/keyboard/Numpad.vue';
-import {ref} from 'vue';
-import { useCallStore } from "@renderer/store/modules/call/call";
+import { ref } from 'vue';
+import { useCall } from "@store/call/call";
 
-const call = useCallStore();
+const call = useCall();
 const inputStr = ref('');
 
 const onInput = (key: string) => {

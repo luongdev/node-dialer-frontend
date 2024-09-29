@@ -14,30 +14,19 @@
 
 <script setup lang="ts">
 import {onMounted, toRefs, watch} from 'vue'
-import {useRouter} from 'vue-router'
-import {useAudioStore} from "@store/agent/audio";
 import {useLoading} from "@store/loading";
 
 const props = defineProps(['error', 'message']);
 const {message, error} = toRefs(props);
 
-const router = useRouter();
-const audio = useAudioStore();
 const loading = useLoading();
 
 onMounted(() => {
-  watch(() => ({local: audio.local, error: audio.error}), async ({local, error}) => {
-    if (local) {
-      await router.push('/');
-      return;
-    }
-
-    setTimeout(() => loading.set(false), 1000);
-  });
+ 
 });
 
 const goCheck = () => {
-  audio.start();
+
   loading.set(true);
 }
 </script>

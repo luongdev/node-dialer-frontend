@@ -9,6 +9,10 @@ const filePath = {
     development: `http://localhost:${process.env.PORT}`,
     production: `file://${join(app.getAppPath(), "dist", "electron", 'renderer', 'index.html')}`
   },
+  trayURL: {
+    development: `http://localhost:${process.env.PORT}/systray`,
+    production: `file://${join(app.getAppPath(), "dist", "electron", 'renderer', 'systray.html')}`
+  },
   loadingURL: {
     development: `http://localhost:${process.env.PORT}/loader.html`,
     production: `file://${join(app.getAppPath(), "dist", "electron", 'renderer', 'loader.html')}`
@@ -37,6 +41,7 @@ function getAppRootPath(path: string) {
 }
 
 export const winURL = filePath.winURL[env]
+export const trayURL = filePath.trayURL[env]
 export const loadingURL = filePath.loadingURL[env]
 export const lib = process.env.__lib
 export const updateFolder = process.env.__updateFolder

@@ -1,7 +1,7 @@
 process.env.NODE_ENV = "production";
 
 import { join } from "path";
-import { say } from "cfonts";
+import { cpSync } from "fs";
 import { deleteAsync } from "del";
 import chalk from "chalk";
 import { rollup, OutputOptions } from "rollup";
@@ -11,7 +11,6 @@ import { errorLog, doneLog } from "./log";
 
 const mainOpt = rollupOptions(process.env.NODE_ENV, "main");
 const preloadOpt = rollupOptions(process.env.NODE_ENV, "preload");
-const isCI = process.env.CI || false;
 
 if (process.env.BUILD_TARGET === "web") web();
 else unionBuild();
@@ -32,11 +31,16 @@ async function clean() {
 }
 
 async function unionBuild() {
-  greeting();
   await clean();
 
   const tasksLister = new Listr(
     [
+      // {
+      //   title: "copy assets to build dir",
+      //   task: async () => {
+      //     cpSync(join(__dirname, '..', 'assets'), join(__dirname, '..', 'build', 'assets'), { recursive: true });
+      //   },
+      // },
       {
         title: "building main process",
         task: async () => {
@@ -92,22 +96,4 @@ async function web() {
     doneLog(`web build success`);
     process.exit();
   });
-}
-
-function greeting() {
-  const cols = process.stdout.columns;
-  let text: boolean | string = "";
-
-  if (cols > 85) text = `let's-build`;
-  else if (cols > 60) text = `let's-|build`;
-  else text = false;
-
-  if (text && !isCI) {
-    say(text, {
-      colors: ["yellow"],
-      font: "simple3d",
-      space: false,
-    });
-  } else console.log(chalk.yellow.bold(`\n  let's-build`));
-  console.log();
 }
