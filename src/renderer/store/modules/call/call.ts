@@ -73,10 +73,7 @@ export const useCall = defineStore({
     },
     actions: {
         init: function (call: CallInfo) {
-            if (this.timer) {
-                clearTimeout(this.timer);
-                this.timer = null;
-            }
+            if (this.timer) clearTimeout(this.timer);
 
             if (this.current?.id) {
                 console.log('Call already exists: ', this.current);
@@ -136,6 +133,7 @@ export const useCall = defineStore({
             this.answerTime = 0;
             this.mute = false;
             this.hold = false;
+            this.timer = null;
         },
     },
 });
