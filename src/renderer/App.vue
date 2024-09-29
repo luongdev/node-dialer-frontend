@@ -1,33 +1,35 @@
 <template>
-    <title-bar/>
-    <router-view v-slot="{ Component }">
-      <component :is="Component"/>
-    </router-view>
+  <title-bar />
+  <router-view v-slot="{ Component }">
+    <component :is="Component" />
+  </router-view>
 </template>
 
 <script setup lang="ts">
 import TitleBar from "@renderer/components/title-bar/title-bar.vue";
-import {onMounted, watch} from "vue";
-import {useUserStore} from "@store/auth/user";
-import {useWebRTCAgent} from "@store/agent/webrtc-agent";
-import {useRouter} from "vue-router";
-import {useAudioStore} from "@store/agent/audio";
+import { onMounted, watch } from "vue";
+import { useUser } from "@store/auth/user";
+import { useRouter } from "vue-router";
+import { useLoading } from "./store/modules/loading";
 
 const router = useRouter();
+const user = useUser();
+const loading = useLoading();
 
-const user = useUserStore();
-const audio = useAudioStore();
-const wrtcAgent = useWebRTCAgent()
+watch(() => user.loggedIn, (loggedIn) => initRoute(loggedIn));
 
-onMounted(() => {
+onMounted(async () => {
   if (user.validate()) {
-    watch(() => wrtcAgent.registered, () => router.push('/'));
-    wrtcAgent.start();
-  } else {
-    router.push('/signin');
+    user.register();
   }
-  audio.start();
+
+  initRoute(user.loggedIn);
 });
+
+const initRoute = (loggedIn: boolean) => {
+  router.push(loggedIn ? '/' : '/signin').catch(console.error);
+  loading.set(false);
+}
 
 </script>
 

@@ -6,7 +6,7 @@ import type {
     BrowserWindow,
 } from "electron";
 
-export interface UseProcessExceptionRetrun {
+export interface UseProcessExceptionReturn {
     /**
      * Emitted when the renderer process unexpectedly disappears. This is normally because it was crashed or killed.
      * If a listener is not passed in, it will default to following the crash prompt
@@ -32,7 +32,7 @@ export interface UseProcessExceptionRetrun {
     ) => void;
 }
 
-export const useProcessException = (): UseProcessExceptionRetrun => {
+export const useProcessException = (): UseProcessExceptionReturn => {
     const renderProcessGone = (
         listener?: (
             event: Event,

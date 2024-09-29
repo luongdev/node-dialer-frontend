@@ -44,11 +44,10 @@ import DID from "@renderer/views/dialer/DID.vue";
 const maxLength = 12;
 
 import Numpad from '@renderer/components/keyboard/Numpad.vue';
-import {ref} from 'vue';
-import {useWebRTCAgent} from '@store/agent/webrtc-agent';
-import DefaultLayout from '@renderer/layouts/DefaultLayout.vue';
+import { ref } from 'vue';
+import { useCall } from "@store/call/call";
 
-const wrtcAgent = useWebRTCAgent();
+const call = useCall();
 const inputStr = ref('');
 
 const onInput = (key: string) => {
@@ -60,7 +59,7 @@ const removeLastNum = () => {
 }
 
 const makeCall = () => {
-  wrtcAgent.call(inputStr.value)
+  call.make(inputStr.value);
 }
 </script>
 

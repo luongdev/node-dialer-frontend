@@ -1,7 +1,7 @@
 "use strict";
 
 import { useMainDefaultIpc } from "./services/ipc-main";
-import { app, session } from "electron";
+import { app, session, Tray } from "electron";
 import InitWindow from "./services/window-manager";
 import { useDisableButton } from "./hooks/disable-button-hook";
 import { useProcessException } from "@main/hooks/exception-hook";
@@ -21,6 +21,8 @@ function onAppReady() {
   createMenu()
 
   new InitWindow().initWindow();
+
+
 
   if (process.env.NODE_ENV === "development") {
     const { VUEJS_DEVTOOLS } = require("electron-devtools-vendor");

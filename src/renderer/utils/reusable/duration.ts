@@ -9,8 +9,11 @@ export const useDuration = (initStartTime = Date.now(), every = 1000) => {
         if (!timer) timer = setInterval(() => formattedTime.value = formatDuration(Date.now() - startTime), every);
     }
 
-    const stop = () => {
+    const stop = (reset = false) => {
         clearInterval(timer);
+        if (reset) formattedTime.value = formatDuration(0);
+
+        timer = null;
     }
 
     return { duration: formattedTime, start, stop }

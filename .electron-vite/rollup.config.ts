@@ -48,7 +48,7 @@ export default (env = "production", type = "main") => {
         // All options are optional
         include: /\.[jt]s?$/, // default, inferred from `loaders` option
         exclude: /node_modules/, // default
-        // watch: process.argv.includes('--watch'), // rollup 中有配置
+        // watch: process.argv.includes('--watch'),
         sourceMap: false, // default
         minify: env === "production",
         target: "es2017", // default, or 'es20XX', 'esnext'

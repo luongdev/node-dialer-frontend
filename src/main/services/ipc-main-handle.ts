@@ -1,4 +1,4 @@
-import { dialog, BrowserWindow, app, IpcMainInvokeEvent, MessageBoxReturnValue, MessageBoxOptions } from "electron";
+import { app, dialog, webContents, BrowserWindow, IpcMainInvokeEvent, MessageBoxReturnValue, MessageBoxOptions } from "electron";
 import { getPreloadFile, winURL } from "../config/static-path";
 import { updater } from "../services/hot-updater";
 import DownloadFile from "../services/download-file";
@@ -6,14 +6,12 @@ import Update from "../services/check-update";
 import config from "@config/index";
 import { IIpcMainHandle } from "../../ipc";
 import { webContentSend } from "./web-content-send";
-import MainInit from "./window-manager";
 
 export class IpcMainHandleClass implements IIpcMainHandle {
   private allUpdater: Update;
   constructor() {
     this.allUpdater = new Update();
   }
-
 
 
   StartDownload = (event: IpcMainInvokeEvent, downloadUrl: string): void | Promise<void> => {
@@ -139,5 +137,24 @@ export class IpcMainHandleClass implements IIpcMainHandle {
     }
 
     // mainWindow.loadURL(winURL + `#${url}`);
+  }
+
+
+  ReloadTrayWindow = (event: IpcMainInvokeEvent, args: string) => {
+    let trayWindow = BrowserWindow.getAllWindows()?.find(w => 'TRAY' === w['name']);
+    if (!trayWindow) {
+      trayWindow.reload();
+    }
+  }
+
+  Broadcast = (event: IpcMainInvokeEvent, { type, body }) => {
+    webContents.getAllWebContents().forEach(wc => {
+      if (wc.id === event.sender.id) return;
+      debugger
+      const trigger = webContentSend[`Broadcast${type}`];
+        if (trigger) {
+          trigger(wc, body);
+        }
+    });
   }
 }
