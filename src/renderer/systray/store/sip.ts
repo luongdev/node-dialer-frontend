@@ -1,15 +1,10 @@
 import { defineStore } from 'pinia';
 import { UA, URI, WebSocketInterface } from 'jssip';
-import {
-    RTCSession
-} from 'jssip/lib/RTCSession';
-
 import { useAudio } from './audio';
 
 import { useUserStore } from '@store/auth/user';
 
 let _ua: UA;
-let _session: RTCSession;
 
 interface SIP {
     connecting: boolean;
@@ -54,7 +49,7 @@ export const useSIP = defineStore({
 
             this.error = null;
             this.connecting = true;
-            
+
 
             const proto = !user.tls ? 'ws' : 'wss';
             const sockets = [new WebSocketInterface(`${proto}://${user.gateway}`)];
@@ -102,49 +97,20 @@ export const useSIP = defineStore({
         },
 
         answer: async function () {
-            if (!_session) return;
-
-            _session.answer({
-                pcConfig: { iceServers: [] },
-                rtcAnswerConstraints: { offerToReceiveAudio: true, offerToReceiveVideo: false },
-            });
+            return true;
         },
 
         terminate: async function (code?: number, cause?: string) {
-            if (!_session) return;
-
-            _session.terminate({ status_code: code ?? 200, reason_phrase: cause ?? 'NORMAL_CLEARING' });
+            return { code, cause };
         },
 
         toggleMute: async function () {
-            if (!_session) return;
-
-            const { audio: audioMuted } = _session.isMuted();
-            if (audioMuted) {
-                _session.unmute({ audio: true });
-            } else {
-                _session.mute({ audio: true });
-            }
+            return true;
         },
 
         toggleHold: async function () {
-            if (!_session) return;
-
-            const { local: localHold } = _session.isOnHold();
-            if (localHold) {
-                _session.unhold();
-            } else {
-                _session.hold();
-            }
+            return true;
         },
 
-        set(session: RTCSession) {
-            _session = session;
-
-            return _session;
-        }
-    },
-    getters: {
-        session: () => _session,
     }
 });

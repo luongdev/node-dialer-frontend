@@ -80,6 +80,35 @@ export const sipMiddleware: PiniaPlugin = ({ store }) => {
             act.after(async (session) => {
                 if (!session) { useCall().status = CallStatus.S_ERROR; }
             });
+        } else if (act.name === 'answer') {
+            act.after(() => {
+                _session.answer({
+                    pcConfig: { iceServers: [] },
+                    rtcAnswerConstraints: { offerToReceiveAudio: true, offerToReceiveVideo: false },
+                });
+            });
+        } else if (act.name === 'terminate') {
+            act.after(({ code, cause }: { code?: number; cause?: string }) => {
+                _session.terminate({ status_code: code ?? 200, reason_phrase: cause ?? 'NORMAL_CLEARING' });
+            });
+        } else if (act.name === 'toggleMute') {
+            act.after(() => {
+                const { audio: audioMuted } = _session.isMuted();
+                if (audioMuted) {
+                    _session.unmute({ audio: true });
+                } else {
+                    _session.mute({ audio: true });
+                }
+            });
+        } else if (act.name === 'toggleHold') {
+            act.after(() => {
+                const { local: localHold } = _session.isOnHold();
+                if (localHold) {
+                    _session.unhold();
+                } else {
+                    _session.hold();
+                }
+            });
         }
     }, true);
 
@@ -154,7 +183,6 @@ const rtcSessionHandler = async (event: RTCSessionEvent, store: any) => {
     }
 
     _session = session;
-    store.set(session);
 
     const call = useCall();
     call.init({
@@ -227,7 +255,7 @@ const onSessionAccepted = async (event: (IncomingEvent | OutgoingEvent), store: 
         audio.remote = new MediaStream();
     }
 
-    store.session?.connection?.getReceivers()?.forEach((receiver: any) => {
+    _session?.connection?.getReceivers()?.forEach((receiver: any) => {
         if (receiver.track) audio.remote.addTrack(receiver.track);
     })
     audio.play();
@@ -250,7 +278,7 @@ const onSessionConfirmed = async (event: IncomingAckEvent | OutgoingAckEvent) =>
 const onSessionEnded = async (event: EndEvent, store: any) => {
     console.debug('UA[onSessionEnded]: ', event);
     const call = useCall();
-    
+
     if ('Rejected' === event.cause) {
         call.status = CallStatus.S_REJECTED;
     } else if ('Terminated' !== event.cause) {
@@ -260,6 +288,5 @@ const onSessionEnded = async (event: EndEvent, store: any) => {
     }
 
     call.timer = setTimeout(() => call[ResetFn]?.(), 1500);
-    store.set(null);
 }
 

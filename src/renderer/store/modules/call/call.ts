@@ -54,7 +54,7 @@ export const useLabel = () => {
             case CallStatus.S_ERROR:
                 return 'Lỗi kết nối';
             default:
-                return 'Không xác định';
+                return 'Chờ cuộc gọi';
         }
     });
 }
