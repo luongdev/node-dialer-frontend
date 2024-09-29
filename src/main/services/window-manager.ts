@@ -59,10 +59,6 @@ class MainInit {
                 activate: true,
             });
         } else {
-            this.mainWindow.webContents.openDevTools({
-                mode: "undocked",
-                activate: true,
-            });
             this.mainWindow.on('show', () => {
                 this.trayWindow?.hide();
             });
@@ -171,12 +167,12 @@ class MainInit {
 
         this.trayWindow.loadURL(trayURL).catch(console.error);
 
-        // if (process.env.NODE_ENV === 'development') {
-        this.trayWindow.on('ready-to-show', () => {
-            this.trayWindow['name'] = 'TRAY';
-            this.trayWindow.webContents.openDevTools({ mode: "undocked", activate: true });
-        });
-        // }
+        if (process.env.NODE_ENV === 'development') {
+            this.trayWindow.on('ready-to-show', () => {
+                this.trayWindow['name'] = 'TRAY';
+                this.trayWindow.webContents.openDevTools({ mode: "undocked", activate: true });
+            });
+        }
 
         const contextMenu = Menu.buildFromTemplate([
             { label: 'Quit', click: () => app.quit() }
