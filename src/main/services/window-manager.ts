@@ -150,6 +150,8 @@ class MainInit {
             minimizable: false,
             fullscreenable: false,
             fullscreen: false,
+            closable: false,
+            skipTaskbar: true,
             webPreferences: {
                 sandbox: false,
                 devTools: true,

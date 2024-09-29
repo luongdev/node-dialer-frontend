@@ -16,20 +16,16 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted, ref, watch} from 'vue';
-import {onClickOutside} from '@vueuse/core';
+import { ref } from 'vue';
+import { onClickOutside } from '@vueuse/core';
 
-import {useUserStore} from '@renderer/store/modules/auth/user';
-import {useWebRTCAgent} from '@renderer/store/modules/agent/webrtc-agent';
-import {useRouter} from 'vue-router';
-import {useLoading} from "@store/loading";
+import { useUserStore } from '@renderer/store/modules/auth/user';
+import { useLoading } from "@store/loading";
 
 const loading = useLoading();
 
-const router = useRouter();
 
 const user = useUserStore();
-const wrtcAgent = useWebRTCAgent();
 
 const target = ref(null);
 const dropdownOpen = ref(false);
@@ -40,19 +36,9 @@ onClickOutside(target, () => {
 
 const onClickSignOut = async () => {
   loading.set(true);
-  wrtcAgent.stop();
   user.clear();
 }
 
-onMounted(() => {
-  watch(() => wrtcAgent.registered, (registered: boolean) => {
-    loading.set(false);
-
-    if (!registered) {
-      router.push('/signin');
-    }
-  })
-})
 
 
 </script>

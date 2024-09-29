@@ -78,7 +78,7 @@ export const useCall = defineStore({
                 return;
             }
 
-            this[ResetFn]();
+            this[ResetFn](this);
             this.current = call;
             this.status = CallStatus.S_NEW;
         },

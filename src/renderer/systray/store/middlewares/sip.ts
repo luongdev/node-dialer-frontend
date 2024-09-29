@@ -66,7 +66,13 @@ export const sipMiddleware: PiniaPlugin = ({ store }) => {
 
     store.$onAction(act => {
         if (act.name === 'connect') {
-            act.after(async (ua: UA) => await connectInject(ua, act.store));
+            act.after(async (ua: UA) => {
+                if (!ua) {
+                    console.warn('Events bind before ua created');
+                    return;
+                }
+                await connectInject(ua, act.store)
+            });
         } else if (act.name === 'call') {
             act.after(async (session) => {
                 if (!session) { useCall().status = CallStatus.S_ERROR; }

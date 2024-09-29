@@ -35,6 +35,7 @@ export const useSIP = defineStore({
             autoRegister: true,
             mute: false,
             hold: false,
+            session: null,
         };
     },
     actions: {
@@ -52,8 +53,9 @@ export const useSIP = defineStore({
                 return;
             }
 
+            this.error = null;
             this.connecting = true;
-            this.error = undefined;
+            
 
             const proto = !user.tls ? 'ws' : 'wss';
             const sockets = [new WebSocketInterface(`${proto}://${user.gateway}`)];

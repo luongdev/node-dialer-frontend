@@ -76,7 +76,6 @@
 <script lang="ts" setup>
 import {computed, onMounted, onUnmounted, watch} from "vue";
 import {useDuration} from "@renderer/utils/reusable/duration";
-import {useWebRTCAgent} from "@renderer/store/modules/agent/webrtc-agent";
 import {CallStatus, useCall, useLabel} from "@renderer/store/modules/call/call";
 import {useUserStore} from "@store/auth/user";
 
@@ -86,7 +85,6 @@ const {startTime} = defineProps({
 
 const call = useCall();
 const user = useUserStore();
-const wrtcAgent = useWebRTCAgent();
 
 const fromNum = computed(() => {
 

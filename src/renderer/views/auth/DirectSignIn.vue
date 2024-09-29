@@ -66,7 +66,7 @@
         </a-form-item>
 
         <a-form-item :wrapper-col="{ offset: 5, span: 16 }">
-          <a-button type="primary" html-type="submit" :loading="!registerAllow">Register</a-button>
+          <a-button type="primary" html-type="submit" :loading="loading">Register</a-button>
         </a-form-item>
       </a-form>
 
@@ -78,9 +78,6 @@
 
 import {reactive, ref, computed, watch, onMounted} from 'vue';
 import {useUserStore, ICEServer} from '@renderer/store/modules/auth/user';
-import {useWebRTCAgent} from '@renderer/store/modules/agent/webrtc-agent';
-import router from '@renderer/router';
-import {notification} from "ant-design-vue";
 import {useLoading} from "@store/loading";
 
 const {ipcRendererChannel} = window;
@@ -88,9 +85,6 @@ const {ipcRendererChannel} = window;
 const loading = useLoading();
 
 const user = useUserStore();
-const wrtcAgent = useWebRTCAgent();
-
-const registerAllow = computed(() => !(wrtcAgent.connecting || wrtcAgent.registering));
 
 const iceAddAllow = computed(() => {
   if (formState.iceServers.length > 2) {
@@ -146,21 +140,6 @@ onMounted(() => {
   formState.iceServers = user.iceServers;
   formState.iceEnabled = !!user.iceServers?.length;
   formState.protocol = user.tls ? 'wss' : 'ws';
-
-  watch(() => ({registered: wrtcAgent.registered, error: wrtcAgent.error}), async ({registered, error}) => {
-    loading.set(false);
-    if (error?.length) {
-      notification.error({
-        message: 'Error',
-        description: error,
-      });
-      return;
-    }
-
-    if (registered) {
-      await router.push('/');
-    }
-  })
 });
 
 
