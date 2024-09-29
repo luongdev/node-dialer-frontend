@@ -1,11 +1,12 @@
 import config from "@config/index";
-import { BrowserWindow, dialog, globalShortcut, Menu, Tray, app } from "electron";
-import { winURL, loadingURL, getPreloadFile } from "../config/static-path";
+import { BrowserWindow, globalShortcut, Menu, Tray, app } from "electron";
+import { winURL, trayURL, loadingURL, getPreloadFile } from "../config/static-path";
 import { useProcessException } from "@main/hooks/exception-hook";
 
 
 class MainInit {
     public winURL: string = "";
+    public trayURL: string = "";
     public shartURL: string = "";
     public loadWindow: BrowserWindow = null;
     public mainWindow: BrowserWindow = null;
@@ -15,6 +16,7 @@ class MainInit {
     constructor() {
         const { childProcessGone } = useProcessException();
         this.winURL = winURL;
+        this.trayURL = trayURL;
         this.shartURL = loadingURL;
         this.childProcessGone = childProcessGone;
     }
@@ -57,6 +59,10 @@ class MainInit {
                 activate: true,
             });
         } else {
+            this.mainWindow.webContents.openDevTools({
+                mode: "undocked",
+                activate: true,
+            });
             this.mainWindow.on('show', () => {
                 this.trayWindow?.hide();
             });
@@ -81,7 +87,7 @@ class MainInit {
             });
         }
 
-        
+
 
         globalShortcut.register('Alt+CommandOrControl+L', () => {
             this.mainWindow.webContents.openDevTools({ mode: "undocked", activate: true });
@@ -141,10 +147,6 @@ class MainInit {
         }
     }
 
-    toggleTrayWindow() {
-
-    }
-
     createTrayWindow = () => {
         this.trayWindow = new BrowserWindow({
             width: 240,
@@ -167,14 +169,14 @@ class MainInit {
             },
         });
 
-        this.trayWindow.loadURL(`${this.winURL}/systray`).catch(console.error);
+        this.trayWindow.loadURL(trayURL).catch(console.error);
 
-        if (process.env.NODE_ENV === 'development') {
-            this.trayWindow.on('ready-to-show', () => {
-                this.trayWindow['name'] = 'TRAY';
-                this.trayWindow.webContents.openDevTools({ mode: "undocked", activate: true });
-            });
-        }
+        // if (process.env.NODE_ENV === 'development') {
+        this.trayWindow.on('ready-to-show', () => {
+            this.trayWindow['name'] = 'TRAY';
+            this.trayWindow.webContents.openDevTools({ mode: "undocked", activate: true });
+        });
+        // }
 
         const contextMenu = Menu.buildFromTemplate([
             { label: 'Quit', click: () => app.quit() }

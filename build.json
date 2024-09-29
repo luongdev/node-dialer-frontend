@@ -1,6 +1,8 @@
 {
   "asar": false,
-  "extraFiles": [],
+  "extraFiles": [
+    "assets/*"
+  ],
   "publish": [
     {
       "provider": "generic",
