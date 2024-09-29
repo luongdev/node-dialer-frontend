@@ -12,6 +12,7 @@ export enum CallStatus {
     S_RINGING = 'RINGING',
     S_ANSWERED = 'ANSWERED',
     S_REJECTED = 'REJECTED',
+    S_CANCELED = 'CANCELED',
     S_TERMINATED = 'TERMINATED',
     S_ERROR = 'ERROR',
 }
@@ -49,6 +50,8 @@ export const useLabel = () => {
                 return 'Đã kết nối';
             case CallStatus.S_REJECTED:
                 return 'Từ chối cuộc gọi';
+            case CallStatus.S_CANCELED:
+                return 'Cuộc gọi đã hủy';
             case CallStatus.S_TERMINATED:
                 return 'Đã kết thúc';
             case CallStatus.S_ERROR:

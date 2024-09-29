@@ -209,6 +209,14 @@ const rtcSessionHandler = async (event: RTCSessionEvent, store: any) => {
         inbound: event.originator === 'remote',
     });
 
+    session.connection?.addEventListener('track', async (event: RTCTrackEvent) => {
+        const audio = useAudio();
+        await audio.start();
+        audio.remote.addTrack(event.track);
+
+        audio.play();
+    });
+
     session.on('accepted', (event: any) => onSessionAccepted(event, store));
     session.on('confirmed', onSessionConfirmed);
     session.on('failed', (event: any) => onSessionEnded(event, store));
@@ -266,15 +274,13 @@ const onSessionAccepted = async (event: (IncomingEvent | OutgoingEvent), store: 
     call.answerTime = Date.now();
     call.status = CallStatus.S_ANSWERED;
 
-    const audio = useAudio();
-    if (!audio.remote) {
-        audio.remote = new MediaStream();
+    if (event.originator === 'local') {
+        const audio = useAudio();
+        _session?.connection?.getReceivers()?.forEach((receiver: any) => {
+            if (receiver.track) audio.remote.addTrack(receiver.track);
+        })
+        audio.play();
     }
-
-    _session?.connection?.getReceivers()?.forEach((receiver: any) => {
-        if (receiver.track) audio.remote.addTrack(receiver.track);
-    })
-    audio.play();
 }
 
 const onSessionProgress = async (event: IncomingEvent | OutgoingEvent) => {
@@ -294,9 +300,12 @@ const onSessionConfirmed = async (event: IncomingAckEvent | OutgoingAckEvent) =>
 const onSessionEnded = async (event: EndEvent, store: any) => {
     console.debug('UA[onSessionEnded]: ', event);
     const call = useCall();
+    useAudio().stop();
 
     if ('Rejected' === event.cause) {
         call.status = CallStatus.S_REJECTED;
+    } else if ('Canceled' === event.cause) {
+        call.status = CallStatus.S_CANCELED;
     } else if ('Terminated' !== event.cause) {
         call.status = CallStatus.S_ERROR;
     } else {

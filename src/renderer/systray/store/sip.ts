@@ -90,7 +90,7 @@ export const useSIP = defineStore({
                 rtcOfferConstraints: { offerToReceiveAudio: true, offerToReceiveVideo: false }
             });
 
-            return this.set(session);
+            return session;
         },
 
         answer: async function () {
