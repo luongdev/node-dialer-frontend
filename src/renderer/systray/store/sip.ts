@@ -9,6 +9,8 @@ import { useAudio } from './audio';
 import { useUserStore } from '@store/auth/user';
 
 let _ua: UA;
+let _session: RTCSession;
+
 interface SIP {
     connecting: boolean;
     connected: boolean;
@@ -20,8 +22,6 @@ interface SIP {
 
     mute: boolean;
     hold: boolean;
-
-    session?: RTCSession;
 }
 
 export const useSIP = defineStore({
@@ -35,7 +35,6 @@ export const useSIP = defineStore({
             autoRegister: true,
             mute: false,
             hold: false,
-            session: null,
         };
     },
     actions: {
@@ -99,45 +98,53 @@ export const useSIP = defineStore({
                 rtcOfferConstraints: { offerToReceiveAudio: true, offerToReceiveVideo: false }
             });
 
-            return session;
+            return this.set(session);
         },
 
         answer: async function () {
-            if (!this.session) return;
+            if (!_session) return;
 
-            this.session.answer({
+            _session.answer({
                 pcConfig: { iceServers: [] },
                 rtcAnswerConstraints: { offerToReceiveAudio: true, offerToReceiveVideo: false },
             });
         },
 
         terminate: async function (code?: number, cause?: string) {
-            if (!this.session) return;
+            if (!_session) return;
 
-            this.session.terminate({ status_code: code ?? 200, reason_phrase: cause ?? 'NORMAL_CLEARING' });
+            _session.terminate({ status_code: code ?? 200, reason_phrase: cause ?? 'NORMAL_CLEARING' });
         },
 
         toggleMute: async function () {
-            if (!this.session) return;
+            if (!_session) return;
 
-            const { audio: audioMuted } = this.session.isMuted();
+            const { audio: audioMuted } = _session.isMuted();
             if (audioMuted) {
-                this.session.unmute({ audio: true });
+                _session.unmute({ audio: true });
             } else {
-                this.session.mute({ audio: true });
+                _session.mute({ audio: true });
             }
         },
 
         toggleHold: async function () {
-            if (!this.session) return;
+            if (!_session) return;
 
-            const { local: localHold } = this.session.isOnHold();
+            const { local: localHold } = _session.isOnHold();
             if (localHold) {
-                this.session.unhold();
+                _session.unhold();
             } else {
-                this.session.hold();
+                _session.hold();
             }
         },
 
+        set(session: RTCSession) {
+            _session = session;
+
+            return _session;
+        }
+    },
+    getters: {
+        session: () => _session,
     }
 });

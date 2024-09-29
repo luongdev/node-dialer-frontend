@@ -4,7 +4,7 @@ export const ResetFn = Symbol('reset');
 
 export const JSONSerializer: Serializer<any> = {
   read: (raw: string) => {
-    if (!raw) return null;
+    if (!raw || 'null' === raw || 'undefined' === raw) return null;
 
     try {
       return JSON.parse(raw);

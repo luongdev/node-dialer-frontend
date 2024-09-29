@@ -73,12 +73,11 @@ export const useCall = defineStore({
     },
     actions: {
         init: function (call: CallInfo) {
-            if (this.current) {
+            if (this.current?.id) {
                 console.log('Call already exists: ', this.current);
                 return;
             }
 
-            this[ResetFn](this);
             this.current = call;
             this.status = CallStatus.S_NEW;
         },
@@ -125,15 +124,13 @@ export const useCall = defineStore({
             });
         },
 
-        [ResetFn]: function (store?: any) {
-            if (!store) return;
-
-            store.current = null;
-            store.status = null;
-            store.error = null;
-            store.answerTime = 0;
-            store.mute = false;
-            store.hold = false;
+        [ResetFn]: function () {
+            this.current = {};
+            this.status = '';
+            this.error = '';
+            this.answerTime = 0;
+            this.mute = false;
+            this.hold = false;
         },
     },
 });

@@ -3,8 +3,8 @@
     <div class="w-full flex flex-col justify-around items-center">
       <div v-if="'ANSWERED' !== call.status" class="text-lg font-bold">{{ callLabel }}</div>
       <div v-else class="text-lg font-bold text-green-500 text-center">{{ duration }}</div>
-      <div class="text-md text-gray-700">{{ from }}</div>
-      <div class="text-md text-gray-700">{{ to }}</div>
+      <div class="text-md text-gray-700">{{ call.current?.from }}</div>
+      <div class="text-md text-gray-700">{{ call.current?.to }}</div>
     </div>
     
     <template v-if="call.status">
@@ -84,7 +84,7 @@ import { useSIP } from '../store/sip';
 
 import { useDuration } from '@renderer/utils/reusable/duration';
 import { useCall, useLabel } from '@store/call/call';
-import { toRefs, watch } from 'vue';
+import { watch } from 'vue';
 
 const call = useCall();
 const callLabel = useLabel();
@@ -93,13 +93,13 @@ const { duration, start, stop } = useDuration();
 
 watch(() => call.status, (status) => {
   if (status === 'ANSWERED') {
-    start();
+    start(call.answerTime);
   } else if (status === 'TERMINATED') {
     stop();
   }
 });
 
-const { from, to } = toRefs(call.current);
+
 
 const answer = () => sip.answer();
 

@@ -16,7 +16,8 @@ import {
     IncomingAckEvent,
     IncomingEvent,
     OutgoingAckEvent,
-    OutgoingEvent
+    OutgoingEvent,
+    RTCSession
 } from "jssip/lib/RTCSession";
 
 import { CallStatus, useCall } from '@store/call/call';
@@ -60,6 +61,8 @@ const connectInject = async (ua: UA, store: any) => {
 
     ua.start();
 }
+
+let _session: RTCSession;
 
 export const sipMiddleware: PiniaPlugin = ({ store }) => {
     if (store.$id !== 'sip') return;
@@ -150,6 +153,9 @@ const rtcSessionHandler = async (event: RTCSessionEvent, store: any) => {
         return;
     }
 
+    _session = session;
+    store.set(session);
+
     const call = useCall();
     call.init({
         id: session.id,
@@ -158,8 +164,6 @@ const rtcSessionHandler = async (event: RTCSessionEvent, store: any) => {
         startTime: Date.now(),
         inbound: event.originator === 'remote',
     });
-
-    store.session = session;
 
     session.on('accepted', (event: any) => onSessionAccepted(event, store));
     session.on('confirmed', onSessionConfirmed);
@@ -215,6 +219,7 @@ const onSessionAccepted = async (event: (IncomingEvent | OutgoingEvent), store: 
     console.debug('UA[onSessionAccepted]: ', event);
 
     const call = useCall();
+    call.answerTime = Date.now();
     call.status = CallStatus.S_ANSWERED;
 
     const audio = useAudio();
@@ -255,8 +260,6 @@ const onSessionEnded = async (event: EndEvent, store: any) => {
     }
 
     call.timer = setTimeout(() => call[ResetFn]?.(), 1500);
-
-    store.session.removeAllListeners();
-    store.session = null;
+    store.set(null);
 }
 
