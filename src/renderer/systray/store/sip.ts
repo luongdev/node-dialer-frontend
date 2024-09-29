@@ -34,8 +34,6 @@ export const useSIP = defineStore({
     },
     actions: {
         connect: async function () {
-            if (this.connecting) return;
-
             if (this.connected) return _ua;
 
             const audio = useAudio();
@@ -47,9 +45,7 @@ export const useSIP = defineStore({
                 return;
             }
 
-            this.error = null;
-            this.connecting = true;
-
+            this.clearFlags();
 
             const proto = !user.tls ? 'ws' : 'wss';
             const sockets = [new WebSocketInterface(`${proto}://${user.gateway}`)];
@@ -63,6 +59,7 @@ export const useSIP = defineStore({
                 user_agent: 'NowfAgent',
                 register: this.autoRegister,
             });
+            this.connecting = true;
 
             return _ua;
         },
@@ -112,5 +109,24 @@ export const useSIP = defineStore({
             return true;
         },
 
+        close: function () {
+            if (!_ua) {
+                return;
+            }
+
+            _ua.unregister();
+            _ua.stop();
+
+            _ua = null;
+            this.clearFlags();
+        },
+
+        clearFlags: function () {
+            this.error = null;
+            this.connecting = false;
+            this.connected = false;
+            this.registering = false;
+            this.registered = false;
+        }
     }
 });

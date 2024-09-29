@@ -39,12 +39,11 @@ export const userStoreMiddleware: PiniaPlugin = ({ store }) => {
     store.$onAction(act => {
         if (act.name === 'register') {
             act.after(async () => {
-                await ipcRendererChannel.Broadcast.invoke({
-                    type: 'Agent',
-                    body: {
-                      event: 'StartConnect'
-                    }
-                  });
+                await ipcRendererChannel.Broadcast.invoke({ type: 'Agent', body: { event: 'StartConnect' } });
+            });
+        } else if (act.name === 'signOut') {
+            act.after(async () => {
+                await ipcRendererChannel.Broadcast.invoke({ type: 'Agent', body: { event: 'Stop' } });
             });
         }
     });

@@ -27,9 +27,9 @@ watch(() => sip.registered, (registered) => {
 })
 
 onMounted(() => {
-  // if (user.validate()) {
-  //   sip.connect();
-  //   router.push('/call');
-  // }
+  if (user.validate()) {
+    sip.connect();
+    router.push('/call');
+  }
 });
 </script>

@@ -36,7 +36,7 @@ onClickOutside(target, () => {
 
 const onClickSignOut = async () => {
   loading.set(true);
-  // user.clear();
+  user.signOut();
 }
 
 

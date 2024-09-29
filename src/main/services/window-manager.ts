@@ -51,55 +51,56 @@ class MainInit {
             if (config.UseStartupChart) this.loadWindow.destroy();
         });
 
-
-        this.mainWindow.on('show', () => {
-            this.trayWindow?.hide();
-        });
-
-        this.mainWindow.on('closed', () => {
-            this.trayWindow?.show();
-        })
-
-        this.mainWindow.on('minimize', () => {
-            this.trayWindow?.show();
-        });
-
-        this.mainWindow.on('restore', () => this.trayWindow?.hide());
-
-        this.mainWindow.on('hide', () => {
-            this.trayWindow?.show();
-        });
-
         if (process.env.NODE_ENV === "development") {
             this.mainWindow.webContents.openDevTools({
                 mode: "undocked",
                 activate: true,
             });
+        } else {
+            this.mainWindow.on('show', () => {
+                this.trayWindow?.hide();
+            });
+
+            this.mainWindow.on('closed', () => {
+                this.trayWindow?.show();
+            })
+
+            this.mainWindow.on('minimize', () => {
+                this.trayWindow?.show();
+            });
+
+            this.mainWindow.on('restore', () => this.trayWindow?.hide());
+
+            this.mainWindow.on('hide', () => {
+                this.trayWindow?.show();
+            });
+
+            this.mainWindow.on('close', (event: Event) => {
+                event.preventDefault();
+                this.mainWindow.minimize();
+            });
         }
 
-        this.mainWindow.on('close', (event: Event) => {
-            event.preventDefault();
-            this.mainWindow.minimize();
-        });
+        
 
         globalShortcut.register('Alt+CommandOrControl+L', () => {
             this.mainWindow.webContents.openDevTools({ mode: "undocked", activate: true });
         });
 
-        this.mainWindow.on("unresponsive", () => {
-            dialog
-                .showMessageBox(this.mainWindow, {
-                    type: "warning",
-                    title: "warn",
-                    buttons: ["Overload", "quit"],
-                    message: "Graphical process becomes unresponsive，Whether to wait for it to recover？",
-                    noLink: true,
-                })
-                .then((res) => {
-                    if (res.response === 0) this.mainWindow.reload();
-                    else this.mainWindow.close();
-                });
-        });
+        // this.mainWindow.on("unresponsive", () => {
+        //     dialog
+        //         .showMessageBox(this.mainWindow, {
+        //             type: "warning",
+        //             title: "warn",
+        //             buttons: ["Overload", "quit"],
+        //             message: "Graphical process becomes unresponsive，Whether to wait for it to recover？",
+        //             noLink: true,
+        //         })
+        //         .then((res) => {
+        //             if (res.response === 0) this.mainWindow.reload();
+        //             else this.mainWindow.close();
+        //         });
+        // });
 
         this.childProcessGone(this.mainWindow);
         this.mainWindow.on("closed", () => {

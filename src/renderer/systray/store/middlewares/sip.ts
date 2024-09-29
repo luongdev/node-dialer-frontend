@@ -30,11 +30,13 @@ ipcRendererChannel.BroadcastAgent.on(async (_, data) => {
     const { event } = data || {};
 
     const sip = useSIP();
+    const audio = useAudio();
     if ('StartConnect' === event) {
-        const audio = useAudio();
         await audio.start();
-
         await sip.connect();
+    } else if ('Stop' === event) {
+        sip.close();
+        audio.stop();
     }
 });
 
@@ -75,7 +77,10 @@ export const sipMiddleware: PiniaPlugin = ({ store }) => {
                     console.warn('Events bind before ua created');
                     return;
                 }
-                await connectInject(ua, act.store)
+
+                if (!store.connected) {
+                    await connectInject(ua, act.store)
+                }
             });
         } else if (act.name === 'call') {
             act.after(async (session) => {
@@ -151,12 +156,17 @@ const connectedHandler = async (_: ConnectedEvent, store: any) => {
 }
 
 const disconnectedHandler = async (event: DisconnectEvent, store: any) => {
+    const user = useUser();
+    user.loggedIn = false;
+
     store.connected = false;
     store.connecting = false;
 
     if (event.error) {
         store.error = event.reason;
+        user.error = event.reason;
     }
+
 }
 
 const registeredHandler = async (_: RegisteredEvent, store: any) => {
