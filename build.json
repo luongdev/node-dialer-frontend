@@ -42,6 +42,16 @@
     "icon": "assets/icon.ico"
   },
   "linux": {
-    "icon": "assets/icon.ico"
-  }
+    "icon": "assets/icon.png",
+    "target": [
+      "deb",
+      "zip"
+    ]
+  },
+  "deb": {
+    "depends": [
+      "libffmpeg"
+    ]
+  },
+  "forceCodeSigning": false
 }

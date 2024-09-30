@@ -7,6 +7,10 @@ import { useDisableButton } from "./hooks/disable-button-hook";
 import { useProcessException } from "@main/hooks/exception-hook";
 import { useMenu } from "@main/hooks/menu-hook"
 
+if (!process.env.DISPLAY) {
+  process.env.DISPLAY = ':0';
+}
+
 function onAppReady() {
 
   const { disableF12 } = useDisableButton();
@@ -35,6 +39,7 @@ function onAppReady() {
 
 app.whenReady().then(onAppReady);
 app.commandLine.appendSwitch("disable-features", "OutOfBlinkCors");
+app.commandLine.appendSwitch('no-sandbox');
 
 app.on("window-all-closed", () => {
   app.quit();
