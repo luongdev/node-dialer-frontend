@@ -1,5 +1,5 @@
-import {defineStore} from "pinia";
-import {RemovableRef, useStorage} from "@vueuse/core";
+import { defineStore } from "pinia";
+import { RemovableRef, useStorage } from "@vueuse/core";
 
 export interface AudioState {
     remote?: MediaStream;
@@ -26,21 +26,25 @@ export const useAudio = defineStore({
     },
     actions: {
         start: async function (devId?: string) {
-            this.error = undefined;
+            try {
+                const constraints = { video: false };
+                if (devId) {
+                    constraints['audio'] = { deviceId: { exact: devId } };
+                    this.inputId = devId;
+                } else {
+                    constraints['audio'] = true;
+                    this.inputId = 'default';
+                }
 
-            const constraints = { video: false };
-            if (devId) {
-                constraints['audio'] = {deviceId: {exact: devId}};
-                this.inputId = devId;
-            } else {
-                constraints['audio'] = true;
-                this.inputId = 'default';
+                this.remote = new MediaStream();
+                this.local = await navigator.mediaDevices.getUserMedia(constraints);
+
+                return { local: this.local, remote: this.remote };
+            } catch (e) {
+                this.inputId = '';
+                this.error = e.message;
+                return { error: true, cause: e.message };
             }
-
-            this.remote = new MediaStream();
-            this.local = await navigator.mediaDevices.getUserMedia(constraints);
-
-            return {local: this.local, remote: this.remote};
         },
         play(remoteStream?: MediaStream) {
             if (remoteStream) {
@@ -55,7 +59,8 @@ export const useAudio = defineStore({
             this.local?.getTracks().forEach((track: any) => track.stop());
             this.remote?.getTracks().forEach((track: any) => track.stop());
 
+            this.inputId = '';
             this.error = '';
         }
     }
-})
+});

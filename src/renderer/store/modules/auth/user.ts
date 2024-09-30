@@ -78,6 +78,10 @@ export const useUser = defineStore({
             return true;
         },
 
+        deviceCheck: function() {
+            return true;
+        },
+
         validate: function () {
             return this.extension && this.domain && this.gateway && this.password;
         },

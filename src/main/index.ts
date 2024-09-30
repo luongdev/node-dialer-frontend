@@ -32,6 +32,8 @@ function onAppReady() {
   }
 }
 
+app.dock.setIcon("./assets/icon.png");
+
 app.whenReady().then(onAppReady);
 app.commandLine.appendSwitch("disable-features", "OutOfBlinkCors");
 

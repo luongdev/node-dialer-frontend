@@ -36,15 +36,7 @@ export const useSIP = defineStore({
         connect: async function () {
             if (this.connected) return _ua;
 
-            const audio = useAudio();
             const user = useUser();
-            try {
-                await audio.start();
-            } catch (e) {
-                this.error = e.message;
-                return;
-            }
-
             this.clearFlags();
 
             const proto = !user.tls ? 'ws' : 'wss';

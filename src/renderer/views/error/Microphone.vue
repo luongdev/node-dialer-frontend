@@ -13,20 +13,29 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted, toRefs, watch} from 'vue'
-import {useLoading} from "@store/loading";
+import { onMounted, toRefs } from 'vue'
+import { useLoading } from "@store/loading";
+import { useUser } from '@renderer/store/modules/auth/user';
+import { watch } from 'vue';
+import { useRouter } from 'vue-router';
 
 const props = defineProps(['error', 'message']);
-const {message, error} = toRefs(props);
+const { message, error } = toRefs(props);
 
 const loading = useLoading();
 
-onMounted(() => {
- 
+const user = useUser();
+const router = useRouter();
+
+watch(() => user.error, (error) => {
+  loading.set(false);
+  if (!error?.length) {
+    router.push('/').catch(console.error);
+  }
 });
 
 const goCheck = () => {
-
   loading.set(true);
+  user.deviceCheck();
 }
 </script>

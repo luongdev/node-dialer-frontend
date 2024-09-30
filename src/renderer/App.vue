@@ -17,9 +17,19 @@ const user = useUser();
 const loading = useLoading();
 
 watch(() => user.loggedIn, (loggedIn) => initRoute(loggedIn));
+watch(() => user.error, (error) => {
+  if (error?.length) {
+    router.push(`/error?error=Microphone&message=${error}`).catch(console.error);
+  } else {
+    router.push('/').catch(console.error);
+  }
+});
 
 onMounted(async () => {
   if (user.validate()) {
+    user.error = '';
+    user.deviceCheck();
+    
     user.register();
   }
 

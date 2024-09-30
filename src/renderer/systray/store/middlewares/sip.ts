@@ -30,9 +30,7 @@ ipcRendererChannel.BroadcastAgent.on(async (_, data) => {
     const { event } = data || {};
 
     const sip = useSIP();
-    const audio = useAudio();
     if ('StartConnect' === event) {
-        await audio.start();
         await sip.connect();
     } else if ('Stop' === event) {
         sip.close();
@@ -211,9 +209,7 @@ const rtcSessionHandler = async (event: RTCSessionEvent, store: any) => {
 
     session.connection?.addEventListener('track', async (event: RTCTrackEvent) => {
         const audio = useAudio();
-        await audio.start();
         audio.remote.addTrack(event.track);
-
         audio.play();
     });
 
