@@ -8,7 +8,7 @@
       </a-tab-pane>
 
       <template #renderTabBar="{ ...props }">
-        <TabBar v-bind="props" />
+        <!-- <TabBar v-bind="props" /> -->
       </template>
     </a-tabs>
   </DefaultLayout>

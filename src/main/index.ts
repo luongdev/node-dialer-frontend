@@ -14,6 +14,7 @@ function onAppReady() {
   const { defaultIpc } = useMainDefaultIpc();
   const { createMenu } = useMenu();
 
+  app.dock?.setIcon("./assets/icon.png");
 
   disableF12();
   renderProcessGone();
@@ -31,8 +32,6 @@ function onAppReady() {
     });
   }
 }
-
-app.dock.setIcon("./assets/icon.png");
 
 app.whenReady().then(onAppReady);
 app.commandLine.appendSwitch("disable-features", "OutOfBlinkCors");

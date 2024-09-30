@@ -13,7 +13,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, toRefs } from 'vue'
+import { toRefs } from 'vue'
 import { useLoading } from "@store/loading";
 import { useUser } from '@renderer/store/modules/auth/user';
 import { watch } from 'vue';
