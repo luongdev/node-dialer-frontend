@@ -38,11 +38,13 @@ if (!userStoreEventHandled) {
     userStoreEventHandled = true;
     ipcRendererChannel.BroadcastAudio.on(async (_, data) => {
         const user = useUser();
-        const { event, body } = data || {};
+        const { event } = data || {};
         if ('MicrophoneError' === event) {
             user.error = 'Microphone: not found';
+            router.push(`/error?error=Microphone&message=${user.error}`).catch(console.error);
         } else if ('MicrophoneReady' === event) {
             user.error = '';
+            router.push(`/`).catch(console.error);
         }
     });
 
