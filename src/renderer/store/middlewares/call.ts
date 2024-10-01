@@ -3,6 +3,7 @@ import { watch } from "vue";
 import { CallStatus, useCall } from "@store/call/call";
 
 import router from '@renderer/router';
+import { useError, ErrorType } from "@store/error";
 
 const { ipcRendererChannel } = window;
 ipcRendererChannel.BroadcastCall.on(async (_, data) => {
@@ -49,6 +50,11 @@ export const callStoreMiddleware: PiniaPlugin = ({ store }) => {
                 if (prevStatus?.length) {
                     store.timer = setTimeout(() => {
                         store.timer = null;
+                        const error = useError();
+                        if (error.eType?.length && error.eType !== ErrorType.E_CALL) {
+                            return;
+                        }
+
                         const back = router.currentRoute?.value?.redirectedFrom;
                         router?.push(back ?? '/')?.catch(console.error);
                     }, 3000);

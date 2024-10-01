@@ -26,7 +26,6 @@ export const userStoreMiddleware: PiniaPlugin = ({ store }) => {
             });
         } else if (act.name === 'deviceCheck') {
             act.after(async () => {
-                store.error = '';
                 await ipcRendererChannel.Broadcast.invoke({ type: 'Audio', body: { event: 'RequestMicrophone' } });
             });
         }
@@ -36,17 +35,6 @@ export const userStoreMiddleware: PiniaPlugin = ({ store }) => {
 let userStoreEventHandled = false;
 if (!userStoreEventHandled) {
     userStoreEventHandled = true;
-    ipcRendererChannel.BroadcastAudio.on(async (_, data) => {
-        const user = useUser();
-        const { event } = data || {};
-        if ('MicrophoneError' === event) {
-            user.error = 'Microphone: not found';
-            router.push(`/error?error=${user.error}`).catch(console.error);
-        } else if ('MicrophoneReady' === event) {
-            user.error = '';
-            router.push(`/`).catch(console.error);
-        }
-    });
 
     ipcRendererChannel.BroadcastAgent.on(async (_, data) => {
         const { event, payload } = data || {};

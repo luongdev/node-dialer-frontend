@@ -28,6 +28,8 @@ const findAudioInput = async () => {
 
 const checkAudioReady = async (store: any) => {
     const error = useError();
+    error.clear();
+    
     const devices = await findAudioInput();
     if (!devices?.length) {
         store.inputId = '';

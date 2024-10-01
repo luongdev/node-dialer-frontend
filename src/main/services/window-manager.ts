@@ -76,17 +76,13 @@ class MainInit {
             this.mainWindow.on('hide', () => {
                 this.trayWindow?.show();
             });
-
-            this.mainWindow.on('close', (event: Event) => {
-                event.preventDefault();
-                this.mainWindow.minimize();
-            });
         }
 
 
 
         globalShortcut.register('Alt+CommandOrControl+L', () => {
-            this.mainWindow.webContents.openDevTools({ mode: "undocked", activate: true });
+            this.mainWindow?.webContents?.openDevTools({ mode: "undocked", activate: true });
+            this.trayWindow?.webContents?.openDevTools({ mode: "undocked", activate: true });
         });
 
         // this.mainWindow.on("unresponsive", () => {
@@ -189,7 +185,12 @@ class MainInit {
                     }
                 }
             },
-            { label: 'Thoát', click: () => app.exit() }
+            {
+                label: 'Thoát', click: () => {
+                    BrowserWindow.getAllWindows().forEach(win => win.destroy());
+                    app.quit();
+                }
+            }
         ]);
 
         const tray = new Tray('./assets/tray.png');

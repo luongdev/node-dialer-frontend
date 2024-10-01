@@ -60,6 +60,7 @@ export const useAudio = defineStore({
             this.remote?.getTracks().forEach((track: any) => track.stop());
 
             this.inputId = '';
+            this.timer = null;
         }
     }
 });
