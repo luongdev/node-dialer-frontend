@@ -23,6 +23,8 @@ export interface CallInfo {
     from?: string;
     startTime?: number;
     inbound?: boolean;
+    autoAnswer: boolean;
+    allowReject: boolean;
 }
 export interface CallState {
     current: RemovableRef<CallInfo>;

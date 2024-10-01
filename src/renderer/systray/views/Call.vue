@@ -12,6 +12,7 @@
         <a-tooltip :title="call.status === 'RINGING' ? 'Từ chối' : 'Kết thúc'" placement="right">
           <button 
             @click="ternmiate" 
+            v-if="call.current?.allowReject || call.status === 'ANSWERED'"
             v-show="call.status && call.status !== 'TERMINATED' && call.status !== 'REJECTED' && call.status !== 'ERROR'" 
             class="bg-red-500 text-white rounded-full w-10 h-10 flex justify-center items-center">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">

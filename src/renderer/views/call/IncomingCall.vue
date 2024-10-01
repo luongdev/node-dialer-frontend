@@ -13,11 +13,14 @@
           <p class="text-xl text-red-500">Cuộc gọi bị từ chối</p>
         </div>
         <div  class="flex justify-around w-full px-6 mt-10">
-          <a-button type="primary" size="large" class="bg-green-500 text-white text-xl py-3 mx-2 rounded-lg"
+          <a-button 
+            type="primary" size="large" class="bg-green-500 text-white text-xl py-3 mx-2 rounded-lg"
             @click="call.answer">
             Answer
           </a-button>
-          <a-button danger type="primary" size="large" class="bg-red-500 text-white text-xl py-3 mx-2 rounded-lg"
+          <a-button 
+            v-if="call.current?.allowReject"
+            danger type="primary" size="large" class="bg-red-500 text-white text-xl py-3 mx-2 rounded-lg"
             @click="call.reject">
             Decline
           </a-button>

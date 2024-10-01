@@ -34,7 +34,7 @@ ipcRendererChannel.BroadcastAgent.on(async (_, data) => {
         await sip.connect();
     } else if ('Stop' === event) {
         sip.close();
-        audio.stop();
+        useAudio().stop();
     }
 });
 
@@ -65,6 +65,13 @@ const connectInject = async (ua: UA, store: any) => {
 
 let _session: RTCSession;
 
+const sessionAnswer = () => {
+    _session?.answer({
+        pcConfig: { iceServers: [] },
+        rtcAnswerConstraints: { offerToReceiveAudio: true, offerToReceiveVideo: false },
+    });
+}
+
 export const sipMiddleware: PiniaPlugin = ({ store }) => {
     if (store.$id !== 'sip') return;
 
@@ -85,12 +92,7 @@ export const sipMiddleware: PiniaPlugin = ({ store }) => {
                 if (!session) { useCall().status = CallStatus.S_ERROR; }
             });
         } else if (act.name === 'answer') {
-            act.after(() => {
-                _session.answer({
-                    pcConfig: { iceServers: [] },
-                    rtcAnswerConstraints: { offerToReceiveAudio: true, offerToReceiveVideo: false },
-                });
-            });
+            act.after(() => sessionAnswer());
         } else if (act.name === 'terminate') {
             act.after(({ code, cause }: { code?: number; cause?: string }) => {
                 _session.terminate({ status_code: code ?? 200, reason_phrase: cause ?? 'NORMAL_CLEARING' });
@@ -196,15 +198,22 @@ const rtcSessionHandler = async (event: RTCSessionEvent, store: any) => {
         return;
     }
 
+
+    const autoAnswer = 'true' === request.getHeader('X-AA');
+    const allowReject = !('false' === request.getHeader('X-RJ'));
+    const inbound = event.originator === 'remote';
+
     _session = session;
 
     const call = useCall();
     call.init({
+        inbound,
+        autoAnswer,
+        allowReject,
         id: session.id,
         to: to.uri.user,
         from: from.uri.user,
         startTime: Date.now(),
-        inbound: event.originator === 'remote',
     });
 
     session.connection?.addEventListener('track', async (event: RTCTrackEvent) => {
@@ -222,8 +231,6 @@ const rtcSessionHandler = async (event: RTCSessionEvent, store: any) => {
         console.debug('UA[onSessionMuted]: ', event);
         const call = useCall();
         call.mute = true;
-
-        // await _broadcastCallState({ mute: true, hold: store.hold });
     });
 
     session.on('unmuted', async (event: any) => {
@@ -283,7 +290,11 @@ const onSessionProgress = async (event: IncomingEvent | OutgoingEvent) => {
     console.debug('UA[onSessionProgress]: ', event);
 
     const call = useCall();
-    call.status = CallStatus.S_RINGING;
+    if (call.current.autoAnswer) {
+        sessionAnswer();
+    } else {
+        call.status = CallStatus.S_RINGING;
+    }
 }
 
 const onSessionConfirmed = async (event: IncomingAckEvent | OutgoingAckEvent) => {

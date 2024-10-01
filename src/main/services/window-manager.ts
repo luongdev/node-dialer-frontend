@@ -175,7 +175,7 @@ class MainInit {
         }
 
         const contextMenu = Menu.buildFromTemplate([
-            { label: 'Quit', click: () => app.quit() }
+            { label: 'Quit', click: () => app.exit() }
         ]);
 
         const tray = new Tray('./assets/tray.png');
