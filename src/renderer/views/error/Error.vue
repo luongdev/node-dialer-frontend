@@ -5,7 +5,7 @@
 
   <div v-else class="flex flex-col justify-center items-center h-screen w-full bg-red-100">
     <div class="bg-white p-6 rounded-lg shadow-lg w-[80%] text-center">
-      <h1 class="text-2xl font-bold text-red-600">Error: {{ error }}</h1>
+      <h1 class="text-2xl font-bold text-red-600">{{ label }}</h1>
       <p class="text-md text-gray-700 mt-4">{{ error.eMsg }}</p>
     </div>
     <div>
@@ -17,10 +17,11 @@
 <script lang="ts" setup>
 import { useRouter } from 'vue-router'
 import Microphone from "@renderer/views/error/Microphone.vue";
-import { useError } from '@renderer/store/modules/error';
+import { useError, useErrorLabel } from '@renderer/store/modules/error';
 
 const router = useRouter();
 const error = useError();
+const label = useErrorLabel();
 
 const goBack = () => {
   router.push('/');

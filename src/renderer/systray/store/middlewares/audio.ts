@@ -1,5 +1,6 @@
 import { PiniaPlugin } from 'pinia';
 import { useAudio } from '../audio';
+import { ErrorType, useError } from '@renderer/store/modules/error';
 
 let timer: NodeJS.Timeout;
 const { ipcRendererChannel } = window;
@@ -26,11 +27,12 @@ const findAudioInput = async () => {
 }
 
 const checkAudioReady = async (store: any) => {
+    const error = useError();
     const devices = await findAudioInput();
-    console.log('Current devices: ', devices);
     if (!devices?.length) {
         store.inputId = '';
-        return await ipcRendererChannel.Broadcast.invoke({ type: 'Audio', body: { event: 'MicrophoneError' } });
+        error.set(ErrorType.E_MICROPHONE, 'Không tìm thấy microphone');
+        return;
     }
 
     const inUse = devices.find(device => device.deviceId === store.inputId);
@@ -50,18 +52,18 @@ const checkAudioReady = async (store: any) => {
     }
 
     if (result && !result.error) {
-        if (store.error?.length) {
-            store.error = '';
-            return await ipcRendererChannel.Broadcast.invoke({ type: 'Audio', body: { event: 'MicrophoneReady' } });
+        if (error.eType === ErrorType.E_MICROPHONE) {
+            error.clear();
         }
     }
 }
 
 
 const onAudioStart = async (data: any, store: any) => {
+    const error = useError();
     if (data.error) {
         store.audioId = '';
-        await ipcRendererChannel.Broadcast.invoke({ type: 'Audio', body: { event: 'MicrophoneError' } });
+        error.set(ErrorType.E_MICROPHONE, 'Không tìm thấy microphone');
     }
 
     navigator.mediaDevices.ondevicechange = async () => {

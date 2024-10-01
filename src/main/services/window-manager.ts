@@ -175,25 +175,28 @@ class MainInit {
         }
 
         const contextMenu = Menu.buildFromTemplate([
-            { label: 'Quit', click: () => app.exit() }
+            {
+                label: 'Cửa sổ chính', click: () => {
+                    if (!this.trayWindow.isVisible()) {
+                        this.trayWindow.show();
+                    }
+
+                    if (!this.mainWindow) {
+                        this.createMainWindow();
+                    } else {
+                        this.mainWindow.show();
+                        this.mainWindow.focus();
+                    }
+                }
+            },
+            { label: 'Thoát', click: () => app.exit() }
         ]);
 
         const tray = new Tray('./assets/tray.png');
         tray.setToolTip('Omicx Dialer');
         tray.setContextMenu(contextMenu);
 
-        tray.on('click', () => {
-            if (!this.trayWindow.isVisible()) {
-                this.trayWindow.show();
-            }
-
-            if (!this.mainWindow) {
-                this.createMainWindow();
-            } else {
-                this.mainWindow.show();
-                this.mainWindow.focus();
-            }
-        });
+        tray.on('click', () => contextMenu.popup());
     }
 }
 

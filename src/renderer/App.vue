@@ -11,12 +11,18 @@ import { onMounted, watch } from "vue";
 import { useUser } from "@store/auth/user";
 import { useRouter } from "vue-router";
 import { useLoading } from "./store/modules/loading";
+import { useError } from "./store/modules/error";
 
 const router = useRouter();
 const user = useUser();
+const error = useError();
 const loading = useLoading();
 
 watch(() => user.loggedIn, (loggedIn) => initRoute(loggedIn));
+
+watch(() => error.eType, () => {
+  initRoute(user.loggedIn);
+});
 
 onMounted(async () => {
   if (user.validate()) {
@@ -31,8 +37,8 @@ onMounted(async () => {
 });
 
 const initRoute = (loggedIn: boolean) => {
-  if (user.error?.length) {
-    router.push(`/error?error=${user.error}`).catch(console.error);
+  if (error.eType?.length) {
+    router.push(`/error`).catch(console.error);
   } else {
     router.push(loggedIn ? '/' : '/signin').catch(console.error);
   }
