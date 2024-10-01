@@ -89,10 +89,10 @@ export const useCall = defineStore({
             this.status = CallStatus.S_NEW;
         },
 
-        make: async function (number: string, headers: { [k: string]: string } = {}) {
+        make: async function (number: string, did = '', headers: { [k: string]: string } = {}) {
             await ipcRendererChannel.Broadcast.invoke({
                 type: 'Call',
-                body: { event: 'Make', payload: { number, headers } },
+                body: { event: 'Make', payload: { number, did: `${did}`, headers } },
             });
         },
 

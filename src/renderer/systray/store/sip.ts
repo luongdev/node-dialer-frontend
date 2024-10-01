@@ -56,7 +56,7 @@ export const useSIP = defineStore({
             return _ua;
         },
 
-        call: async function (number: string, headers: { [k: string]: string } = {}) {
+        call: async function (number: string, did = '', headers: { [k: string]: string } = {}) {
             if (!number || !_ua) return;
 
             const user = useUser();
@@ -67,9 +67,7 @@ export const useSIP = defineStore({
                 target = `sip:${number}@${user.domain}`
             }
 
-            if (user.currentDID?.length) {
-                headers['Dialed-Number'] = user.currentDID;
-            }
+            if (did?.length) headers['Dialed-Number'] = did;
 
             const extraHeaders = Object.keys(headers).map(k => {
                 return `X-${k}: ${headers[k]}`;

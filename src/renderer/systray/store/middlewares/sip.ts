@@ -43,8 +43,8 @@ ipcRendererChannel.BroadcastCall.on(async (_, data) => {
 
     const sip = useSIP();
     if ('Make' === event) {
-        const { number, headers } = payload || {};
-        sip.call(number, headers);
+        const { number, did, headers } = payload || {};
+        sip.call(number, did, headers);
     } else if ('Answer' === event) {
         sip.answer();
     } else if ('Terminated' === event) {

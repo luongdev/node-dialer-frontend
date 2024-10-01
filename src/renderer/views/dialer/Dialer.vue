@@ -46,8 +46,10 @@ const maxLength = 12;
 import Numpad from '@renderer/components/keyboard/Numpad.vue';
 import { ref } from 'vue';
 import { useCall } from "@store/call/call";
+import { useUser } from "@renderer/store/modules/auth/user";
 
 const call = useCall();
+const user = useUser();
 const inputStr = ref('');
 
 const onInput = (key: string) => {
@@ -59,7 +61,7 @@ const removeLastNum = () => {
 }
 
 const makeCall = () => {
-  call.make(inputStr.value);
+  call.make(inputStr.value, user.currentDID);
 }
 </script>
 
