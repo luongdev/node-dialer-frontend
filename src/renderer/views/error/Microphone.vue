@@ -13,23 +13,21 @@
 </template>
 
 <script setup lang="ts">
-import { toRefs } from 'vue'
 import { useLoading } from "@store/loading";
-import { useUser } from '@renderer/store/modules/auth/user';
 import { watch } from 'vue';
 import { useRouter } from 'vue-router';
+import { useError } from '@renderer/store/modules/error';
+import { useUser } from '@renderer/store/modules/auth/user';
 
-const props = defineProps(['error', 'message']);
-const { message, error } = toRefs(props);
-
-const loading = useLoading();
 
 const user = useUser();
+const loading = useLoading();
+const error = useError();
 const router = useRouter();
 
-watch(() => user.error, (error) => {
+watch(() => error.eType, (typ) => {
   loading.set(false);
-  if (!error?.length) {
+  if (!typ?.length) {
     router.push('/').catch(console.error);
   }
 });

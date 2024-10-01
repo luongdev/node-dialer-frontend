@@ -1,11 +1,10 @@
 import { defineStore } from "pinia";
 import { RemovableRef, useStorage } from "@vueuse/core";
+import { ErrorType, useError } from "@renderer/store/modules/error";
 
 export interface AudioState {
     remote?: MediaStream;
     local?: MediaStream;
-    error?: string;
-
     inputId: RemovableRef<string>;
     outputId: RemovableRef<string>;
 }
@@ -19,7 +18,6 @@ export const useAudio = defineStore({
         return {
             remote: undefined,
             local: undefined,
-            error: '',
             inputId,
             outputId,
         }
@@ -42,7 +40,9 @@ export const useAudio = defineStore({
                 return { local: this.local, remote: this.remote };
             } catch (e) {
                 this.inputId = '';
-                this.error = e.message;
+                const error = useError();
+                error.set(ErrorType.E_MICROPHONE, 'Không thể truy cập microphone');
+
                 return { error: true, cause: e.message };
             }
         },
@@ -60,7 +60,6 @@ export const useAudio = defineStore({
             this.remote?.getTracks().forEach((track: any) => track.stop());
 
             this.inputId = '';
-            this.error = '';
         }
     }
 });
