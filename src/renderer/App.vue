@@ -20,15 +20,22 @@ watch(() => user.loggedIn, (loggedIn) => initRoute(loggedIn));
 
 onMounted(async () => {
   if (user.validate()) {
-    user.deviceCheck();
-    user.register();
+    if (!user.loggedIn) {
+      user.register();
+    } else {
+      user.deviceCheck();
+    }
   }
 
   initRoute(user.loggedIn);
 });
 
 const initRoute = (loggedIn: boolean) => {
-  router.push(loggedIn ? '/' : '/signin').catch(console.error);
+  if (user.error?.length) {
+    router.push(`/error?error=${user.error}`).catch(console.error);
+  } else {
+    router.push(loggedIn ? '/' : '/signin').catch(console.error);
+  }
   loading.set(false);
 }
 

@@ -41,7 +41,7 @@ if (!userStoreEventHandled) {
         const { event } = data || {};
         if ('MicrophoneError' === event) {
             user.error = 'Microphone: not found';
-            router.push(`/error?error=Microphone&message=${user.error}`).catch(console.error);
+            router.push(`/error?error=${user.error}`).catch(console.error);
         } else if ('MicrophoneReady' === event) {
             user.error = '';
             router.push(`/`).catch(console.error);
